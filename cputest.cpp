@@ -1,3 +1,15 @@
+class CPUTest1 : public ::testing::Test {
+    void SetUp() override {
+        // Called immediately after the constructor
+    }
+
+    void TearDown() override {
+        // Called immediately after the test
+    }
+}
+
+
+/*
 #include "cpu.hpp"
 
 int main() {
@@ -24,3 +36,4 @@ int main() {
     cpu.Execute( 4, mem);
 
 }
+*/
