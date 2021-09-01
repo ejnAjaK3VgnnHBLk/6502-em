@@ -15,12 +15,13 @@ struct Mem {
             Data[i] = 0;
     }
 
+    // Read one byte
     Byte operator[] (unsigned int address)  const {
         assert (address <= MAX_MEM);
         return Data[address];
     }
 
-    // Read one byte
+    // Write one byte
     Byte& operator[] (unsigned int address) {
         assert (address <= MAX_MEM);
         return Data[address];

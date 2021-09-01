@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "6502src/cpu.hpp"
 
-class CPUTest1 : public ::testing::Test {
+class InstructionTest1 : public ::testing::Test {
     public:
         CPU cpu;
         Mem mem;
@@ -18,21 +18,12 @@ class CPUTest1 : public ::testing::Test {
     }
 };
 /*
-    INS_LDA_AB
-    INS_LDA_ABX
-    INS_LDA_ABY
-    INS_LDA_IDX
-    INS_LDA_IDY
-
-    INS_LDX_IM
-    INS_LDX_ZP
-    INS_LDX_ZPY
     INS_LDX_ABS
     INS_LDX_ABY
 
     INS_JSR
  */
-TEST_F(CPUTest1, TestLDAImmediate) {
+TEST_F(InstructionTest1, TestLDAImmediate) {
  /* Start - Inline test */
     mem[0x0000] = cpu.INS_LDA_IM;
     mem[0x0001] = 0x42;
@@ -40,9 +31,16 @@ TEST_F(CPUTest1, TestLDAImmediate) {
     cpu.Execute(4, mem);
 
     EXPECT_EQ( cpu.A, 0x42 );
+    EXPECT_FALSE(cpu.C);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_FALSE(cpu.I);
+    EXPECT_FALSE(cpu.D);
+    EXPECT_FALSE(cpu.B);
+    EXPECT_FALSE(cpu.V);
+    EXPECT_FALSE(cpu.N);
 }
 
-TEST_F(CPUTest1, TestLDAZeroPage) {
+TEST_F(InstructionTest1, TestLDAZeroPage) {
     mem[0x0000] = cpu.INS_LDA_ZP;
     mem[0x0001] = 0x69;
 
@@ -51,9 +49,16 @@ TEST_F(CPUTest1, TestLDAZeroPage) {
     cpu.Execute(3, mem);
 
     EXPECT_EQ( cpu.A, 0x49);
+    EXPECT_FALSE(cpu.C);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_FALSE(cpu.I);
+    EXPECT_FALSE(cpu.D);
+    EXPECT_FALSE(cpu.B);
+    EXPECT_FALSE(cpu.V);
+    EXPECT_FALSE(cpu.N);
 }
 
-TEST_F(CPUTest1, TestLDAZeroPageX) {
+TEST_F(InstructionTest1, TestLDAZeroPageX) {
     cpu.X = 0x1;
     mem[0x0000] = cpu.INS_LDA_ZPX;
     mem[0x0001] = 0x43;
@@ -63,9 +68,16 @@ TEST_F(CPUTest1, TestLDAZeroPageX) {
     cpu.Execute(5, mem);
 
     EXPECT_EQ( cpu.A, 0x50);
+    EXPECT_FALSE(cpu.C);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_FALSE(cpu.I);
+    EXPECT_FALSE(cpu.D);
+    EXPECT_FALSE(cpu.B);
+    EXPECT_FALSE(cpu.V);
+    EXPECT_FALSE(cpu.N);
 }
 
-TEST_F(CPUTest1, TestLDAZeroPageXWhenItWraps) {
+TEST_F(InstructionTest1, TestLDAZeroPageXWhenItWraps) {
     cpu.X = 0xFF;
     mem[0x0000] = cpu.INS_LDA_ZPX;
     mem[0x0001] = 0x80;
@@ -75,9 +87,16 @@ TEST_F(CPUTest1, TestLDAZeroPageXWhenItWraps) {
     cpu.Execute(5, mem);
 
     EXPECT_EQ( cpu.A, 0x50);
+    EXPECT_FALSE(cpu.C);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_FALSE(cpu.I);
+    EXPECT_FALSE(cpu.D);
+    EXPECT_FALSE(cpu.B);
+    EXPECT_FALSE(cpu.V);
+    EXPECT_FALSE(cpu.N);
 }
 
-TEST_F(CPUTest1, TestLDAAbsolute) {
+TEST_F(InstructionTest1, TestLDAAbsolute) {
     mem[0x0000] = cpu.INS_LDA_AB;
     mem[0x0001] = 0x10;
     mem[0x0002] = 0x00;
@@ -87,10 +106,17 @@ TEST_F(CPUTest1, TestLDAAbsolute) {
     cpu.Execute(6, mem);
 
     EXPECT_EQ( cpu.A, 0x1);
+    EXPECT_FALSE(cpu.C);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_FALSE(cpu.I);
+    EXPECT_FALSE(cpu.D);
+    EXPECT_FALSE(cpu.B);
+    EXPECT_FALSE(cpu.V);
+    EXPECT_FALSE(cpu.N);
 
 }
 
-TEST_F(CPUTest1, TestLDAAbsoluteX) {
+TEST_F(InstructionTest1, TestLDAAbsoluteX) {
     cpu.X = 5;
     mem[0x0000] = cpu.INS_LDA_ABX;
     mem[0x0001] = 0x10;
@@ -101,5 +127,129 @@ TEST_F(CPUTest1, TestLDAAbsoluteX) {
     cpu.Execute(4, mem);
 
     EXPECT_EQ(cpu.A, 0x42);
+    EXPECT_FALSE(cpu.C);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_FALSE(cpu.I);
+    EXPECT_FALSE(cpu.D);
+    EXPECT_FALSE(cpu.B);
+    EXPECT_FALSE(cpu.V);
+    EXPECT_FALSE(cpu.N);
 
+}
+
+TEST_F(InstructionTest1, TestLDAAbsoluteY) {
+    cpu.Y = 5;
+    mem[0x0000] = cpu.INS_LDA_ABY;
+    mem[0x0001] = 0x10;
+    mem[0x0002] = 0x00;
+
+    mem[0x0015] = 0x42;
+
+    cpu.Execute(4, mem);
+
+    EXPECT_EQ(cpu.A, 0x42);
+    EXPECT_FALSE(cpu.C);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_FALSE(cpu.I);
+    EXPECT_FALSE(cpu.D);
+    EXPECT_FALSE(cpu.B);
+    EXPECT_FALSE(cpu.V);
+    EXPECT_FALSE(cpu.N);
+
+}
+
+TEST_F(InstructionTest1, TestLDAIndirectX) {
+    cpu.X = 0x5;
+    mem[0x0000] = cpu.INS_LDA_IDX;
+    mem[0x0001] = 0x41;
+
+    mem[0x46] = 0x42;
+
+    cpu.Execute(5, mem);
+    EXPECT_EQ(cpu.A, 0x42);
+    EXPECT_FALSE(cpu.C);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_FALSE(cpu.I);
+    EXPECT_FALSE(cpu.D);
+    EXPECT_FALSE(cpu.B);
+    EXPECT_FALSE(cpu.V);
+    EXPECT_FALSE(cpu.N);
+}
+
+TEST_F(InstructionTest1, TestLDAIndirectY) {
+    cpu.Y = 0x5;
+    mem[0x0000] = cpu.INS_LDA_IDY;
+    mem[0x0001] = 0x41;
+
+    mem[0x46] = 0x42;
+
+    cpu.Execute(5, mem);
+    EXPECT_EQ(cpu.A, 0x42);
+    EXPECT_FALSE(cpu.C);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_FALSE(cpu.I);
+    EXPECT_FALSE(cpu.D);
+    EXPECT_FALSE(cpu.B);
+    EXPECT_FALSE(cpu.V);
+    EXPECT_FALSE(cpu.N);
+}
+
+TEST_F(InstructionTest1, TestLDXImmediate) {
+    mem[0x0000] = cpu.INS_LDX_IM;
+    mem[0x0001] = 0x69;
+
+    cpu.Execute(4, mem);
+
+    EXPECT_EQ(cpu.X, 0x69);
+    EXPECT_FALSE(cpu.C);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_FALSE(cpu.I);
+    EXPECT_FALSE(cpu.D);
+    EXPECT_FALSE(cpu.B);
+    EXPECT_FALSE(cpu.V);
+    EXPECT_FALSE(cpu.N);
+}
+
+TEST_F(InstructionTest1, TestLDXZeroPage) {
+    mem[0x0000] = cpu.INS_LDX_ZP;
+    mem[0x0001] = 0x80;
+
+    mem[0x0080] = 0x69;
+
+    cpu.Execute(4, mem);
+
+    EXPECT_EQ(cpu.X, 0x69);
+    EXPECT_FALSE(cpu.C);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_FALSE(cpu.I);
+    EXPECT_FALSE(cpu.D);
+    EXPECT_FALSE(cpu.B);
+    EXPECT_FALSE(cpu.V);
+    EXPECT_FALSE(cpu.N);
+}
+
+TEST_F(InstructionTest1, TestLDXZeroPageY) {
+    cpu.Y = 0x21;
+    EXPECT_EQ(cpu.Y, 0x21);
+
+    mem[0x0000] = cpu.INS_LDX_ZPY;
+    mem[0x0001] = 0x21;
+
+    mem[0x0042] = 0x69;
+
+    cpu.Execute(6, mem);
+
+    EXPECT_EQ(cpu.X, 0x69);
+}
+
+TEST_F(InstructionTest1, TestLDXAbsolute) {
+    mem[0x0000] = cpu.INS_LDX_AB;
+    mem[0x0001] = 0x10;
+    mem[0x0002] = 0x00;
+
+    mem[0x0010] = 0x1;
+
+    cpu.Execute(6, mem);
+
+    EXPECT_EQ( cpu.X, 0x1);
 }

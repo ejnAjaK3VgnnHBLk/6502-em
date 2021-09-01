@@ -26,7 +26,7 @@ struct CPU {
     Byte I : 1;
     Byte D : 1;
     Byte B : 1;
-    Byte O : 1;
+    Byte V : 1;
     Byte N : 1;
 
     // Read byte from memory, increment program counter and decrement nCycles
@@ -70,7 +70,7 @@ struct CPU {
         // Remember the 6502 is LITTLE ENDIAN, MEANING THE LEAST SIGNIFICANT
         // BIT COMES FIRST.
         Word Data = mem[addr];
-
+        addr++;
         Data |= (mem[addr] << 8);
         nCycles-=2;
 
@@ -108,7 +108,7 @@ struct CPU {
         std::cout << "I: " << std::hex << unsigned(I) << ", ";
         std::cout << "D: " << std::hex << unsigned(D) << ", ";
         std::cout << "B: " << std::hex << unsigned(B) << ", ";
-        std::cout << "O: " << std::hex << unsigned(O) << ", ";
+        std::cout << "V: " << std::hex << unsigned(V) << ", ";
         std::cout << "N: " << std::hex << unsigned(N) << "\n";
     }
 
@@ -131,7 +131,7 @@ struct CPU {
         INS_LDX_IM = 0xA2,
         INS_LDX_ZP = 0xA6,
         INS_LDX_ZPY = 0xB6,
-        INS_LDX_ABS = 0xAE,
+        INS_LDX_AB = 0xAE,
         INS_LDX_ABY = 0xBE,
 
         INS_JSR = 0x20
@@ -206,7 +206,7 @@ struct CPU {
                 case INS_LDX_ZP: {
                     Byte zpAddress = FetchByte(nCycles, mem); // Get argument from PC
                     X = ReadByte(nCycles, zpAddress, mem); // Read from address
-                    LDAStatusUpdate(); 
+                    LDXStatusUpdate(); 
                 } break;
                 case INS_LDX_ZPY: {
                     Byte zpAddress = FetchByte(nCycles, mem);
@@ -216,9 +216,9 @@ struct CPU {
                     /* Check if address is greater than 1 byte. if it is, "overflow" */
                     if(zpAddress >= 0xFF) { zpAddress -= 0x100; } 
                     X = ReadByte(nCycles, zpAddress, mem);
-                    LDAStatusUpdate();
+                    LDXStatusUpdate();
                 } break;
-                case INS_LDX_ABS: {
+                case INS_LDX_AB: {
                     Word addr = FetchWord(nCycles, mem);
                     X = ReadByte(nCycles, addr, mem);
                     LDXStatusUpdate();
@@ -228,6 +228,7 @@ struct CPU {
                     addr += Y;
                     nCycles--;
                     X = ReadByte(nCycles, addr, mem); 
+                    LDXStatusUpdate();
                 } break;
 
                 // JSR instruction
@@ -248,7 +249,7 @@ struct CPU {
     void Reset(Mem &mem) {
         PC = 0xFFFC;             // Initialize program counter to 0xFFC
         SP = 0x0100;            // Inititalize stack pointer to 0x01FF
-        C = Z = I = D = B = O = N = 0; // Reset status flags
+        C = Z = I = D = B = V = N = 0; // Reset status flags
         A = X = Y = 0;          // Reset registers
         mem.Init();             // Reset memory
     }
