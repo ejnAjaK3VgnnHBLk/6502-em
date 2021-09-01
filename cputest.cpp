@@ -95,10 +95,10 @@ TEST_F(InstructionTest1, TestLDAZeroPageXWhenItWraps) {
 
 TEST_F(InstructionTest1, TestLDAAbsolute) {
     mem[0x0000] = cpu.INS_LDA_AB;
-    mem[0x0001] = 0x10;
-    mem[0x0002] = 0x00;
+    mem[0x0001] = 0x00;
+    mem[0x0002] = 0x01;
 
-    mem[0x0010] = 0x1;
+    mem[0x0100] = 0x1;
 
     cpu.Execute(6, mem);
 
@@ -249,10 +249,10 @@ TEST_F(InstructionTest1, TestLDXZeroPageY) {
 
 TEST_F(InstructionTest1, TestLDXAbsolute) {
     mem[0x0000] = cpu.INS_LDX_AB;
-    mem[0x0001] = 0x10;
-    mem[0x0002] = 0x00;
+    mem[0x0001] = 0x34;
+    mem[0x0002] = 0x12;
 
-    mem[0x0010] = 0x1;
+    mem[0x1234] = 0x1;
 
     cpu.Execute(6, mem);
 
