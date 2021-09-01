@@ -38,7 +38,7 @@ struct CPU {
     }
 
     // Same thing as FetchByte but don't increment program counter
-    Byte ReadByte(unsigned int &nCycles, Byte addr, Mem &mem) {
+    Byte ReadByte(unsigned int &nCycles, Word addr, Mem &mem) {
         Byte ins = mem[addr];
         nCycles--;
         return ins;
@@ -66,7 +66,7 @@ struct CPU {
     }
 
     // Same thing as FetchWord but don't increment program counter
-    Word ReadWord(unsigned int &nCycles, Byte addr, Mem &mem) {
+    Word ReadWord(unsigned int &nCycles, Word addr, Mem &mem) {
         // Remember the 6502 is LITTLE ENDIAN, MEANING THE LEAST SIGNIFICANT
         // BIT COMES FIRST.
         Word Data = mem[addr];
