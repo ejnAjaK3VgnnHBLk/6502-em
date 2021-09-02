@@ -247,6 +247,27 @@ TEST_F(InstructionTest1, TestLDXZeroPageY) {
     EXPECT_FALSE(cpu.N);
 }
 
+TEST_F(InstructionTest1, TestLDXZeroPageYWhenItWraps) {
+    cpu.Y = 0xFF;
+
+    mem[0x0000] = cpu.INS_LDX_ZPY;
+    mem[0x0001] = 0x80;
+
+    mem[0x007F] = 0x69;
+
+    cpu.Execute(6, mem);
+
+    EXPECT_EQ(cpu.X, 0x69);
+
+    EXPECT_FALSE(cpu.C);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_FALSE(cpu.I);
+    EXPECT_FALSE(cpu.D);
+    EXPECT_FALSE(cpu.B);
+    EXPECT_FALSE(cpu.V);
+    EXPECT_FALSE(cpu.N);
+}
+
 TEST_F(InstructionTest1, TestLDXAbsolute) {
     mem[0x0000] = cpu.INS_LDX_AB;
     mem[0x0001] = 0x34;
