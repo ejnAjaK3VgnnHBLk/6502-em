@@ -15,8 +15,8 @@ enable_testing()
 
 include_directories(6502include)
 
-file(GLOB SOURCES "6502src/*.cpp" "6502include/*.hpp")
-add_executable(cputest ${SOURCES} cputest.cpp)
+file(GLOB SOURCES "6502test/*.cpp" "6502test/*.hpp" "6502src/*.cpp" "6502include/*.hpp")
+add_executable(cputest ${SOURCES} )
 
 target_link_libraries(
 	cputest

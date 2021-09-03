@@ -57,6 +57,12 @@ struct CPU {
     void LDAStatusUpdate();
     void LDXStatusUpdate();
 
+    // Get zero page address Y
+    Byte GetZeroPageAddrY(unsigned int& nCycles, Mem &mem);
+    Byte GetZeroPageAddrX(unsigned int& nCycles, Mem &mem);
+    Word GetAddrY(unsigned int &nCycles, Mem &mem);
+    Word GetAddrX(unsigned int &nCycles, Mem &mem);
+
     /*
      * Immediate: load next byte as the "argument" to the instruction.
      * Zero Page: load next byte as the address (in the zero page) to the
