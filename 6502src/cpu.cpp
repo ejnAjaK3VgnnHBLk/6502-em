@@ -1,104 +1,62 @@
 #include "../6502include/cpu.hpp"
 
-void CPU::Reset(Mem &mem) {
-    PC = 0xFFFC;             // Initialize program counter to 0xFFC
-    SP = 0x0100;            // Inititalize stack pointer to 0x01FF
-    C = Z = I = D = B = V = N = 0; // Reset status flags
-    A = X = Y = 0;          // Reset registers
-    mem.Init();             // Reset memory
-}
-
 void CPU::Execute(unsigned int nCycles, Mem &mem) {
     while (nCycles > 0) {
         Byte instruction = FetchByte(nCycles, mem);
         switch (instruction) {
             // LDA instruction
             case INS_LDA_IM: {
-                Byte val = FetchByte(nCycles, mem);
-                A = val;            // Set accululator to the value
+                A = FetchByte(nCycles, mem);            // Set accululator to the value
                 LDAStatusUpdate();  // Set status flags
             } break;
             case INS_LDA_ZP: {
-                Byte zpAddress = FetchByte(nCycles, mem); // Get argument from PC
-                A = ReadByte(nCycles, zpAddress, mem); // Read from address
+                A = ReadByte(nCycles, FetchByte(nCycles, mem), mem); // Read from address
                 LDAStatusUpdate(); 
             } break;
             case INS_LDA_ZPX: {
-                Byte zpAddress = FetchByte(nCycles, mem);
-                zpAddress += X; // Add x register to zpAddress 
-                nCycles--;      // Add operation takes one clock cycle so decrement 
-                                // nCycles
-                /* Check if address is greater than 1 byte. if it is, "overflow" */
-                if(zpAddress >= 0xFF) { zpAddress -= 0x100; } 
-                A = ReadByte(nCycles, zpAddress, mem);
+                A = ReadByte(nCycles, GetZeroPageAddrX(nCycles, mem), mem);
                 LDAStatusUpdate();
             } break;
             case INS_LDA_AB: {
-                Word addr = FetchWord(nCycles, mem);
-                A = ReadByte(nCycles, addr, mem);
+                A = ReadByte(nCycles, FetchWord(nCycles, mem), mem);
                 LDAStatusUpdate();
             } break;
             case INS_LDA_ABX: {
-                Word addr = FetchWord(nCycles, mem);
-                addr += X; // Add X register to the fetched address
-                nCycles--; // Addition takes one cycle
-                A = ReadByte(nCycles, addr, mem); // Read the value and put into A
+                A = ReadByte(nCycles, GetAddrX(nCycles, mem), mem); // Read the value and put into A
                 LDAStatusUpdate();
             } break;
             case INS_LDA_ABY: {
-                Word addr = FetchWord(nCycles, mem);
-                addr += Y; // Add X register to the fetched address
-                nCycles--; // Addition takes one cycle
-                A = ReadByte(nCycles, addr, mem); // Read the value and put into A
+                A = ReadByte(nCycles, GetAddrY(nCycles, mem), mem); // Read the value and put into A
                 LDAStatusUpdate();
             } break;
             case INS_LDA_IDX: {
-                Byte a = FetchByte(nCycles, mem); // Get address of table
-                a += X; // Add x to address of table
-                if (a > 0xFF) { a -= 0x100; } // Can't be out of the zero page
-                nCycles--; // a+=X takes 1 clock cycle
-                A = ReadByte(nCycles, a, mem); // Read the value at the address
+                A = ReadByte(nCycles, GetZeroPageAddrX(nCycles, mem), mem); // Read the value at the address
                 LDAStatusUpdate();
             } break;
             case INS_LDA_IDY: { // Same as above but with Y register
-                Byte a = FetchByte(nCycles, mem); // Get address of table
-                a += Y; // Add x to address of table
-                if (a > 0xFF) { a -= 0x100; } // Can't be out of the zero page
-                nCycles--; // a+=X takes 1 clock cycle
-                A = ReadByte(nCycles, a, mem); // Read the value at the address
+                A = ReadByte(nCycles, GetZeroPageAddrY(nCycles, mem), mem); // Read the value at the address
                 LDAStatusUpdate();
             } break;
             // LDX instruction
             case INS_LDX_IM: {
-                Byte val = FetchByte(nCycles, mem);
-                X = val;
+                X = FetchByte(nCycles, mem);
                 LDXStatusUpdate();
             } break;
             case INS_LDX_ZP: {
-                Byte zpAddress = FetchByte(nCycles, mem); // Get argument from PC
-                X = ReadByte(nCycles, zpAddress, mem); // Read from address
+                X = ReadByte(nCycles, FetchByte(nCycles, mem), mem); // Read from address
                 LDXStatusUpdate(); 
             } break;
             case INS_LDX_ZPY: {
-                Byte zpAddress = FetchByte(nCycles, mem);
-                zpAddress += Y; // Add x register to zpAddress 
-                nCycles--;      // Add operation takes one clock cycle so decrement 
-                                // nCycles
-                /* Check if address is greater than 1 byte. if it is, "overflow" */
-                if(zpAddress >= 0xFF) { zpAddress -= 0x100; } 
-                X = ReadByte(nCycles, zpAddress, mem);
-                LDXStatusUpdate();
-            } break;
-            case INS_LDX_AB: {
-                Word addr = FetchWord(nCycles, mem);
+                Byte addr = GetZeroPageAddrY(nCycles, mem);
                 X = ReadByte(nCycles, addr, mem);
                 LDXStatusUpdate();
             } break;
+            case INS_LDX_AB: {
+                X = ReadByte(nCycles, FetchWord(nCycles, mem), mem);
+                LDXStatusUpdate();
+            } break;
             case INS_LDX_ABY: {
-                Word addr = FetchWord(nCycles, mem);
-                addr += Y;
-                nCycles--;
-                X = ReadByte(nCycles, addr, mem); 
+                X = ReadByte(nCycles, GetAddrY(nCycles, mem), mem); 
                 LDXStatusUpdate();
             } break;
 
@@ -192,4 +150,46 @@ Word CPU::ReadWord(unsigned int &nCycles, Word addr, Mem &mem) {
     // for big endian systems.
 
     return Data;
+}
+
+Byte CPU::GetZeroPageAddrY(unsigned int& nCycles, Mem &mem) {
+    Byte zpAddress = FetchByte(nCycles, mem);
+    zpAddress += Y; // Add x register to zpAddress 
+    nCycles--;      // Add operation takes one clock cycle so decrement 
+                    // nCycles
+    /* Check if address is greater than 1 byte. if it is, "overflow" */
+    if(zpAddress >= 0xFF) { zpAddress -= 0x100; nCycles--; } 
+    return zpAddress;
+}
+
+Byte CPU::GetZeroPageAddrX(unsigned int& nCycles, Mem &mem) {
+    Byte zpAddress = FetchByte(nCycles, mem);
+    zpAddress += X; // Add x register to zpAddress 
+    nCycles--;      // Add operation takes one clock cycle so decrement 
+                    // nCycles
+    /* Check if address is greater than 1 byte. if it is, "overflow" */
+    if(zpAddress >= 0xFF) { zpAddress -= 0x100; nCycles--; } 
+    return zpAddress;
+}
+
+Word CPU::GetAddrY(unsigned int &nCycles, Mem &mem) {
+    Word addr = FetchWord(nCycles, mem);
+    addr += Y; // Add X register to the fetched address
+    nCycles--; // Addition takes one cycle
+    return addr;
+}
+
+Word CPU::GetAddrX(unsigned int &nCycles, Mem &mem) {
+    Word addr = FetchWord(nCycles, mem);
+    addr += X; // Add X register to the fetched address
+    nCycles--; // Addition takes one cycle
+    return addr;
+}
+
+void CPU::Reset(Mem &mem) {
+    PC = 0xFFFC;             // Initialize program counter to 0xFFC
+    SP = 0x0100;            // Inititalize stack pointer to 0x01FF
+    C = Z = I = D = B = V = N = 0; // Reset status flags
+    A = X = Y = 0;          // Reset registers
+    mem.Init();             // Reset memory
 }
