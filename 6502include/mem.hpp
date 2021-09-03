@@ -1,3 +1,6 @@
+#ifndef __MEM_HPP__
+#define __MEM_HPP__
+
 #include <cassert>
 #include <cstdint>
 
@@ -33,3 +36,5 @@ struct Mem {
         cycles -= 2;
     }
 };
+
+#endif

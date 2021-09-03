@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "6502src/cpu.hpp"
+#include "6502include/cpu.hpp"
 
 class InstructionTest1 : public ::testing::Test {
     public:

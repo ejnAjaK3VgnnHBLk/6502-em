@@ -13,10 +13,11 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-add_executable(
-	cputest
-	cputest.cpp
-)
+include_directories(6502include)
+
+file(GLOB SOURCES "6502src/*.cpp" "6502include/*.hpp")
+add_executable(cputest ${SOURCES} cputest.cpp)
+
 target_link_libraries(
 	cputest
 	gtest_main
