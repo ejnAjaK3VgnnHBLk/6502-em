@@ -1,4 +1,4 @@
-#include "../6502include/cpu.hpp"
+#include "cpu.hpp"
 
 void CPU::Execute(unsigned int nCycles, Mem &mem) {
     while (nCycles > 0) {
@@ -62,6 +62,10 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
 
             // JSR instruction
             case INS_JSR: {
+                /* WIP:
+                The JSR instruction pushes the address (minus one) of the return point on to the stack and then sets the program counter to the target memory address.
+                */
+
                 Word jmpAddr = FetchWord(nCycles, mem); // We first get the address by fetching the next word
                 mem.WriteWord(PC - 1, SP, nCycles);     // Then write the current program counter - 1 (as per the 6502 instruction set spec.)
                 SP++;                                   // Increment stack pointer cuz we just wrote to the stack

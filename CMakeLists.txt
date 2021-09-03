@@ -13,6 +13,9 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
+set (CMAKE_CXX_FLAGS "-I ${PROJECT_DIRECTORY}/6502include") # Specify that include files all come
+															# from the 6502include directory.
+
 include_directories(6502include)
 
 file(GLOB SOURCES "6502test/*.cpp" "6502test/*.hpp" "6502src/*.cpp" "6502include/*.hpp")
