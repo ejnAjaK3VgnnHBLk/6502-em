@@ -12,11 +12,7 @@ const static unsigned int MAX_MEM = 1024 * 64;
 struct Mem {
     Byte Data[MAX_MEM];
 
-    void Init() {
-        // Reset all of memory to 0's
-        for ( unsigned int i = 0; i < MAX_MEM; i++ )
-            Data[i] = 0;
-    }
+    void Init();
 
     // Read one byte
     Byte operator[] (unsigned int address)  const {
@@ -28,12 +24,6 @@ struct Mem {
     Byte& operator[] (unsigned int address) {
         assert (address <= MAX_MEM);
         return Data[address];
-    }
-
-    void WriteWord(Word dta, unsigned int addr, unsigned int &cycles) {
-        Data[addr] = dta & 0xFF;
-        Data[addr+1] = (dta >> 8);
-        cycles -= 2;
     }
 };
 

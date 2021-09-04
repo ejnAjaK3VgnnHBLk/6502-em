@@ -59,6 +59,48 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
                 X = ReadByte(nCycles, GetAddrY(nCycles, mem), mem); 
                 LDXStatusUpdate();
             } break;
+            // STA Instruction
+            case INS_STA_ZP: {
+                WriteToMemFromRegister(A, FetchByte(nCycles, mem), nCycles, mem);
+            }break;
+            case INS_STA_ZPX: {
+                WriteToMemFromRegister(A, GetZeroPageAddrX(nCycles, mem), nCycles, mem);
+            } break;
+            case INS_STA_AB: {
+                WriteToMemFromRegister(A, FetchWord(nCycles, mem), nCycles, mem);
+            } break;
+            case INS_STA_ABX: {
+                WriteToMemFromRegister(A, GetAddrX(nCycles, mem), nCycles, mem);
+            }break;
+            case INS_STA_ABY: {
+                WriteToMemFromRegister(A, GetAddrY(nCycles, mem), nCycles, mem);
+            } break;
+            case INS_STA_IDX: {
+                WriteToMemFromRegister(A, GetZeroPageAddrX(nCycles, mem), nCycles, mem);
+            } break;
+             case INS_STA_IDY: {
+                WriteToMemFromRegister(A, GetZeroPageAddrY(nCycles, mem), nCycles, mem);
+            } break;
+            // STX instruction
+            case INS_STX_ZP: {
+                WriteToMemFromRegister(X, FetchByte(nCycles, mem), nCycles, mem);  
+            }break;
+            case INS_STX_ZPY: {
+                WriteToMemFromRegister(X, GetZeroPageAddrY(nCycles, mem), nCycles, mem);
+            } break;
+            case INS_STX_AB: {
+                WriteToMemFromRegister(X, FetchWord(nCycles, mem), nCycles, mem);
+            } break;
+            // STY instruction
+            case INS_STY_ZP: {
+                WriteToMemFromRegister(Y, FetchByte(nCycles, mem), nCycles, mem);
+            } break;
+            case INS_STY_ZPX: {
+                WriteToMemFromRegister(Y, GetZeroPageAddrX(nCycles, mem), nCycles, mem);
+            } break;
+            case INS_STY_AB: {
+                WriteToMemFromRegister(Y, FetchWord(nCycles, mem), nCycles, mem);
+            }
 
             // JSR instruction
             case INS_JSR: {
@@ -67,8 +109,8 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
                 */
 
                 Word jmpAddr = FetchWord(nCycles, mem); // We first get the address by fetching the next word
-                mem.WriteWord(PC - 1, SP, nCycles);     // Then write the current program counter - 1 (as per the 6502 instruction set spec.)
-                SP++;                                   // Increment stack pointer cuz we just wrote to the stack
+                WriteWord(PC - 1, SP, nCycles, mem);         // Then write the current program counter - 1 (as per the 6502 instruction set spec.)
+                SP+=2;                                  // Increment stack pointer cuz we just wrote to the stack
 
                 PC = jmpAddr;                           // New program counter is the address we just read
                 nCycles--;                              // We used up a cycle so decrement
@@ -124,17 +166,10 @@ Word CPU::FetchWord(unsigned int &nCycles, Mem &mem) {
     // BIT COMES FIRST.
     Word Data = mem[PC];
     PC++;
-    nCycles--;
 
     Data |= (mem[PC] << 8);
     PC++;
-    nCycles--;
-
-    // Swap lower and higher bits if your platform is not low endian
-    // x86_64 is little endian, so I don't need to swap the bytes around
-    // luckily, but eventually add test here to make this platform agnostic
-    // Note to future self: you can just do the previous steps in reverse 
-    // for big endian systems.
+    nCycles-=2;
 
     return Data;
 }
@@ -147,13 +182,23 @@ Word CPU::ReadWord(unsigned int &nCycles, Word addr, Mem &mem) {
     Data |= (mem[addr] << 8);
     nCycles-=2;
 
-    // Swap lower and higher bits if your platform is not low endian
-    // x86_64 is little endian, so I don't need to swap the bytes around
-    // luckily, but eventually add test here to make this platform agnostic
-    // Note to future self: you can just do the previous steps in reverse 
-    // for big endian systems.
-
     return Data;
+}
+
+void CPU::WriteWord(Word dta, unsigned int addr, unsigned int &cycles, Mem &mem) {
+    mem[addr] = dta & 0xFF;
+    mem[addr+1] = (dta >> 8);
+    cycles -= 2;
+}
+
+void CPU::WriteByte(Byte data, unsigned int addr, unsigned int &nCycles, Mem &mem) {
+    mem[addr] = data;
+    nCycles--;
+}
+
+void CPU::WriteToMemFromRegister(Byte &reg, Word addr, unsigned int& nCycles, Mem &mem) {
+    mem[addr] = reg;
+    nCycles--;
 }
 
 Byte CPU::GetZeroPageAddrY(unsigned int& nCycles, Mem &mem) {
