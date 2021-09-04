@@ -64,11 +64,17 @@ struct CPU {
     void LDAStatusUpdate();
     void LDXStatusUpdate();
 
-    // Get zero page address Y
-    Byte GetZeroPageAddrY(unsigned int& nCycles, Mem &mem);
-    Byte GetZeroPageAddrX(unsigned int& nCycles, Mem &mem);
-    Word GetAddrY(unsigned int &nCycles, Mem &mem);
-    Word GetAddrX(unsigned int &nCycles, Mem &mem);
+    // Addressing modes
+    Byte AddressingZeroPage(unsigned int &nCycles, Mem &mem);
+    Byte AddressingZeroPageX(unsigned int &nCycles, Mem &mem);
+    Byte AddressingZeroPageY(unsigned int &nCycles, Mem &mem);
+    Byte AddressingRelative(unsigned int &nCycles, Mem &mem);
+    Word AddressingAbsolute(unsigned int &nCycles, Mem &mem);
+    Word AddressingAbsoluteX(unsigned int &nCycles, Mem &mem);
+    Word AddressingAbsoluteY(unsigned int &nCycles, Mem &mem);
+    Word AddressingIndirect(unsigned int &nCycles, Mem &mem);
+    Word AddressingIndexedIndirect(unsigned int &nCycles, Mem &mem);
+    Word AddressingIndirectIndexed(unsigned int &nCycles, Mem &mem);
 
     /*
      * Immediate: load next byte as the "argument" to the instruction.

@@ -90,27 +90,31 @@ TEST_F(MemoryInstructionTests, TestSTAAbsoluteY){
 }
 
 TEST_F(MemoryInstructionTests, TestSTAIndirectX) {
-    cpu.A = 0x69;
-    cpu.X = 0x01;
+    cpu.X = 0x04;
+    cpu.A = 0x42;
+	mem[0x0000] = cpu.INS_STA_IDX;
+	mem[0x0001] = 0x02;
 
-    mem[0x0000] = cpu.INS_STA_IDX;
-    mem[0x0001] = 0x41;
+	mem[0x0006] = 0x00;	//0x2 + 0x4
+	mem[0x0007] = 0x80;	
 
     cpu.Execute(6, mem);
-
-    EXPECT_EQ(mem[0x42], 0x69);
+    
+    EXPECT_EQ(mem[0x8000], 0x42);
 }
 
 TEST_F(MemoryInstructionTests, TestSTAIndirectY) {
-    cpu.A = 0x69;
-    cpu.Y = 0x01;
+    cpu.Y = 0x04;
+    cpu.A = 0x42;
+	mem[0x0000] = cpu.INS_STA_IDY;
+	mem[0x0001] = 0x02;
 
-    mem[0x0000] = cpu.INS_STA_IDY;
-    mem[0x0001] = 0x41;
+	mem[0x0006] = 0x00;	//0x2 + 0x4
+	mem[0x0007] = 0x80;	
 
     cpu.Execute(6, mem);
-
-    EXPECT_EQ(mem[0x42], 0x69);
+    
+    EXPECT_EQ(mem[0x8000], 0x42);
 }
 
 TEST_F(MemoryInstructionTests, TestSTXZeroPage) {

@@ -1,4 +1,5 @@
 #include "cpu.hpp"
+#include <iostream>
 
 void CPU::Execute(unsigned int nCycles, Mem &mem) {
     while (nCycles > 0) {
@@ -14,7 +15,7 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
                 LDAStatusUpdate(); 
             } break;
             case INS_LDA_ZPX: {
-                A = ReadByte(nCycles, GetZeroPageAddrX(nCycles, mem), mem);
+                A = ReadByte(nCycles, AddressingZeroPageX(nCycles, mem), mem);
                 LDAStatusUpdate();
             } break;
             case INS_LDA_AB: {
@@ -22,19 +23,21 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
                 LDAStatusUpdate();
             } break;
             case INS_LDA_ABX: {
-                A = ReadByte(nCycles, GetAddrX(nCycles, mem), mem); // Read the value and put into A
+                A = ReadByte(nCycles, AddressingAbsoluteX(nCycles, mem), mem); // Read the value and put into A
                 LDAStatusUpdate();
             } break;
             case INS_LDA_ABY: {
-                A = ReadByte(nCycles, GetAddrY(nCycles, mem), mem); // Read the value and put into A
+                A = ReadByte(nCycles, AddressingAbsoluteY(nCycles, mem), mem); // Read the value and put into A
                 LDAStatusUpdate();
             } break;
             case INS_LDA_IDX: {
-                A = ReadByte(nCycles, GetZeroPageAddrX(nCycles, mem), mem); // Read the value at the address
+                Word addr = AddressingIndexedIndirect(nCycles, mem);
+                std::cout << "Addr: " << std::hex << addr << std::endl;
+                A = ReadByte(nCycles, addr, mem); // Read the value at the address
                 LDAStatusUpdate();
             } break;
             case INS_LDA_IDY: { // Same as above but with Y register
-                A = ReadByte(nCycles, GetZeroPageAddrY(nCycles, mem), mem); // Read the value at the address
+                A = ReadByte(nCycles, AddressingIndirectIndexed(nCycles, mem), mem); // Read the value at the address
                 LDAStatusUpdate();
             } break;
             // LDX instruction
@@ -47,7 +50,7 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
                 LDXStatusUpdate(); 
             } break;
             case INS_LDX_ZPY: {
-                Byte addr = GetZeroPageAddrY(nCycles, mem);
+                Byte addr = AddressingZeroPageY(nCycles, mem);
                 X = ReadByte(nCycles, addr, mem);
                 LDXStatusUpdate();
             } break;
@@ -56,7 +59,7 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
                 LDXStatusUpdate();
             } break;
             case INS_LDX_ABY: {
-                X = ReadByte(nCycles, GetAddrY(nCycles, mem), mem); 
+                X = ReadByte(nCycles, AddressingAbsoluteY(nCycles, mem), mem); 
                 LDXStatusUpdate();
             } break;
             // STA Instruction
@@ -64,29 +67,29 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
                 WriteToMemFromRegister(A, FetchByte(nCycles, mem), nCycles, mem);
             }break;
             case INS_STA_ZPX: {
-                WriteToMemFromRegister(A, GetZeroPageAddrX(nCycles, mem), nCycles, mem);
+                WriteToMemFromRegister(A, AddressingZeroPageX(nCycles, mem), nCycles, mem);
             } break;
             case INS_STA_AB: {
                 WriteToMemFromRegister(A, FetchWord(nCycles, mem), nCycles, mem);
             } break;
             case INS_STA_ABX: {
-                WriteToMemFromRegister(A, GetAddrX(nCycles, mem), nCycles, mem);
+                WriteToMemFromRegister(A, AddressingAbsoluteX(nCycles, mem), nCycles, mem);
             }break;
             case INS_STA_ABY: {
-                WriteToMemFromRegister(A, GetAddrY(nCycles, mem), nCycles, mem);
+                WriteToMemFromRegister(A, AddressingAbsoluteY(nCycles, mem), nCycles, mem);
             } break;
             case INS_STA_IDX: {
-                WriteToMemFromRegister(A, GetZeroPageAddrX(nCycles, mem), nCycles, mem);
+                WriteToMemFromRegister(A, AddressingIndexedIndirect(nCycles, mem), nCycles, mem);
             } break;
              case INS_STA_IDY: {
-                WriteToMemFromRegister(A, GetZeroPageAddrY(nCycles, mem), nCycles, mem);
+                WriteToMemFromRegister(A, AddressingIndirectIndexed(nCycles, mem), nCycles, mem);
             } break;
             // STX instruction
             case INS_STX_ZP: {
                 WriteToMemFromRegister(X, FetchByte(nCycles, mem), nCycles, mem);  
             }break;
             case INS_STX_ZPY: {
-                WriteToMemFromRegister(X, GetZeroPageAddrY(nCycles, mem), nCycles, mem);
+                WriteToMemFromRegister(X, AddressingZeroPageY(nCycles, mem), nCycles, mem);
             } break;
             case INS_STX_AB: {
                 WriteToMemFromRegister(X, FetchWord(nCycles, mem), nCycles, mem);
@@ -96,11 +99,11 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
                 WriteToMemFromRegister(Y, FetchByte(nCycles, mem), nCycles, mem);
             } break;
             case INS_STY_ZPX: {
-                WriteToMemFromRegister(Y, GetZeroPageAddrX(nCycles, mem), nCycles, mem);
+                WriteToMemFromRegister(Y, AddressingZeroPageX(nCycles, mem), nCycles, mem);
             } break;
             case INS_STY_AB: {
                 WriteToMemFromRegister(Y, FetchWord(nCycles, mem), nCycles, mem);
-            }
+            } break;
 
             // JSR instruction
             case INS_JSR: {
@@ -116,7 +119,7 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
                 nCycles--;                              // We used up a cycle so decrement
             } break;
             default:
-                std::cout << "Instruction not handled!\n";     
+                std::cout << "Instruction: " << std::hex << unsigned(instruction) << " not handled!\n" ;     
         }break;
     }
 }
@@ -201,39 +204,82 @@ void CPU::WriteToMemFromRegister(Byte &reg, Word addr, unsigned int& nCycles, Me
     nCycles--;
 }
 
-Byte CPU::GetZeroPageAddrY(unsigned int& nCycles, Mem &mem) {
+
+// Addressing Mode Functions
+// We're not going to include implicit (for obvious reasons), immediate (becuase it 
+//      specifies a value not an address), and relative (becuase we're going to only 
+//      use that for branching instrucitons, which can be handled by that function.)
+Byte CPU::AddressingZeroPage(unsigned int &nCycles, Mem &mem) {
+    // zero page addressing mode has only an 8 bit address operand
+    return FetchByte(nCycles, mem);
+}
+
+Byte CPU::AddressingZeroPageX(unsigned int &nCycles, Mem &mem) {
+    // taking the 8 bit zero page address from the instruction and adding the current value of 
+    // the X register to it
     Byte zpAddress = FetchByte(nCycles, mem);
-    zpAddress += Y; // Add x register to zpAddress 
-    nCycles--;      // Add operation takes one clock cycle so decrement 
-                    // nCycles
-    /* Check if address is greater than 1 byte. if it is, "overflow" */
+    zpAddress += X;
+    nCycles--; 
     if(zpAddress >= 0xFF) { zpAddress -= 0x100; nCycles--; } 
     return zpAddress;
 }
 
-Byte CPU::GetZeroPageAddrX(unsigned int& nCycles, Mem &mem) {
+Byte CPU::AddressingZeroPageY(unsigned int &nCycles, Mem &mem) {
+    // taking the 8 bit zero page address from the instruction and adding the current value of 
+    // the Y register to it
     Byte zpAddress = FetchByte(nCycles, mem);
-    zpAddress += X; // Add x register to zpAddress 
-    nCycles--;      // Add operation takes one clock cycle so decrement 
-                    // nCycles
-    /* Check if address is greater than 1 byte. if it is, "overflow" */
+    zpAddress += Y; 
+    nCycles--; 
     if(zpAddress >= 0xFF) { zpAddress -= 0x100; nCycles--; } 
     return zpAddress;
 }
 
-Word CPU::GetAddrY(unsigned int &nCycles, Mem &mem) {
+Word CPU::AddressingAbsolute(unsigned int &nCycles, Mem &mem) {
+    // contain a full 16 bit address to identify the target location
+    return FetchWord(nCycles, mem);
+}
+
+Word CPU::AddressingAbsoluteX(unsigned int &nCycles, Mem &mem) {
+    // taking the 16 bit address from the instruction and added the contents of the X register
+    Word addr = FetchWord(nCycles, mem);
+    addr += X; // Add X register to the fetched address
+    nCycles--; // Addition takes one cycle
+    return addr;
+}
+
+Word CPU::AddressingAbsoluteY(unsigned int &nCycles, Mem &mem) {
+    // same as the previous mode only with the contents of the Y register
     Word addr = FetchWord(nCycles, mem);
     addr += Y; // Add X register to the fetched address
     nCycles--; // Addition takes one cycle
     return addr;
 }
 
-Word CPU::GetAddrX(unsigned int &nCycles, Mem &mem) {
-    Word addr = FetchWord(nCycles, mem);
-    addr += X; // Add X register to the fetched address
-    nCycles--; // Addition takes one cycle
-    return addr;
+Word CPU::AddressingIndirect(unsigned int &nCycles, Mem &mem) {
+    // The instruction contains a 16 bit address which identifies the location of the least 
+    //significant byte of another 16 bit memory address which is the real target of the instruction
+    Byte addr = FetchByte(nCycles, mem);
+    return ReadWord(nCycles, addr, mem);
+
 }
+
+Word CPU::AddressingIndexedIndirect(unsigned int &nCycles, Mem &mem) {
+    // The address of the table is taken from the instruction and the X register added to it (with 
+    // zero page wrap around) to give the location of the least significant byte of the target address.
+    Byte addr = FetchByte(nCycles, mem);
+    addr += X;
+    nCycles--;
+    return ReadWord(nCycles, addr, mem);
+}
+
+Word CPU::AddressingIndirectIndexed(unsigned int &nCycles, Mem &mem) {
+    // In instruction contains the zero page location of the least significant byte of 16 bit address. 
+    // The Y register is dynamically added to this value to generated the actual target address for operation.
+    Byte addr = FetchByte(nCycles, mem);
+    addr += Y;
+    nCycles--;
+    return ReadWord(nCycles, addr, mem);
+}   
 
 void CPU::Reset(Mem &mem) {
     PC = 0xFFFC;             // Initialize program counter to 0xFFC
