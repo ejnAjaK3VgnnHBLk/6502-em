@@ -1,5 +1,4 @@
 #include "cpu.hpp"
-#include <iostream>
 
 void CPU::Execute(unsigned int nCycles, Mem &mem) {
     while (nCycles > 0) {
