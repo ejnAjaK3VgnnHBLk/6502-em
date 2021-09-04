@@ -51,6 +51,9 @@ struct CPU {
     // Write register to memory
     void WriteToMemFromRegister(Byte &reg, Word addr, unsigned int& nCycles, Mem &mem);
 
+    // Write to register using value
+    void WriteRegister(Byte &reg, Byte value);
+
     // Execute instruction based on PC location
     void Execute(unsigned int nCycles, Mem &mem);
 
@@ -61,8 +64,7 @@ struct CPU {
     void debugReport();
 
     // Status flag update after function call (where necessary)
-    void LDAStatusUpdate();
-    void LDXStatusUpdate();
+    void UpdateZeroAndNegativeFlags(Byte &reg);
 
     // Addressing modes
     Byte AddressingZeroPage(unsigned int &nCycles, Mem &mem);
