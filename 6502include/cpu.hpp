@@ -44,6 +44,13 @@ struct CPU {
     // Same thing as FetchWord but don't increment program counter
     Word ReadWord(unsigned int &nCycles, Word addr, Mem &mem);
 
+    // Write word and byte
+    void WriteWord(Word dta, unsigned int addr, unsigned int &cycles, Mem &mem);
+    void WriteByte(Byte data, unsigned int addr, unsigned int &nCycles, Mem &mem);
+
+    // Write register to memory
+    void WriteToMemFromRegister(Byte &reg, Word addr, unsigned int& nCycles, Mem &mem);
+
     // Execute instruction based on PC location
     void Execute(unsigned int nCycles, Mem &mem);
 
@@ -85,7 +92,25 @@ struct CPU {
         INS_LDX_AB = 0xAE,
         INS_LDX_ABY = 0xBE,
 
-        INS_JSR = 0x20
+        INS_STA_ZP = 0x85,
+        INS_STA_ZPX = 0x95,
+        INS_STA_AB = 0x8D,
+        INS_STA_ABX = 0x9D,
+        INS_STA_ABY = 0x99,
+        INS_STA_IDX = 0x81,
+        INS_STA_IDY = 0x91,
+
+        INS_STX_ZP = 0x86,
+        INS_STX_ZPY = 0x96,
+        INS_STX_AB = 0x8E,
+
+        INS_STY_ZP = 0x84,
+        INS_STY_ZPX = 0x94,
+        INS_STY_AB = 0x8C,
+
+        INS_JSR = 0x20,
+
+        INS_RTS = 0x60
         ;
 
 };
