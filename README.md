@@ -1,0 +1,4 @@
+# Emulator for the 6502 microprocessor
+Emulator for the 6502 microprocessor, found in many computers like the Commodore 64, Apple II, NES, and various Atari's. The microprocessor is cheap (nowadays), relatively simple, and there are a bunch of people who know a lot about the CPU, making it a great canidate for writing an emulator for. All of the information I'm using comes from [here](http://www.obelisk.me.uk/6502/index.html). One day I hpoe to extend this emulator to include a [65C22](https://en.wikipedia.org/wiki/WDC_65C22) to fully emulate [the breadboard computer that Ben Eater made](https://www.youtube.com/playlist?list=PLowKtXNTBypFbtuVMUVXNR0z1mu7dp7eH).
+
+The project came from a need to rapidly write and test code for a 65c02-based operating system (will begin work again when the emulator is done!)
