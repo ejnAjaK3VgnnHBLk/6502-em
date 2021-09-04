@@ -154,14 +154,18 @@ TEST_F(LoadRegisterTest, TestLDAAbsoluteY) {
 }
 
 TEST_F(LoadRegisterTest, TestLDAIndirectX) {
-    cpu.X = 0x5;
-    mem[0x0000] = cpu.INS_LDA_IDX;
-    mem[0x0001] = 0x41;
+    cpu.X = 0x04;
+	mem[0x0000] = cpu.INS_LDA_IDX;
+	mem[0x0001] = 0x02;
 
-    mem[0x46] = 0x42;
+	mem[0x0006] = 0x00;	//0x2 + 0x4
+	mem[0x0007] = 0x80;	
+	mem[0x8000] = 0x37;
 
-    cpu.Execute(5, mem);
-    EXPECT_EQ(cpu.A, 0x42);
+    cpu.Execute(6, mem);
+    
+    EXPECT_EQ(cpu.A, 0x37);
+
     EXPECT_FALSE(cpu.C);
     EXPECT_FALSE(cpu.Z);
     EXPECT_FALSE(cpu.I);
@@ -172,14 +176,18 @@ TEST_F(LoadRegisterTest, TestLDAIndirectX) {
 }
 
 TEST_F(LoadRegisterTest, TestLDAIndirectY) {
-    cpu.Y = 0x5;
-    mem[0x0000] = cpu.INS_LDA_IDY;
-    mem[0x0001] = 0x41;
+    cpu.Y = 0x04;
+	mem[0x0000] = cpu.INS_LDA_IDY;
+	mem[0x0001] = 0x02;
 
-    mem[0x46] = 0x42;
+	mem[0x0006] = 0x00;	//0x2 + 0x4
+	mem[0x0007] = 0x80;	
+	mem[0x8000] = 0x37;
 
-    cpu.Execute(5, mem);
-    EXPECT_EQ(cpu.A, 0x42);
+    cpu.Execute(6, mem);
+    
+    EXPECT_EQ(cpu.A, 0x37);
+
     EXPECT_FALSE(cpu.C);
     EXPECT_FALSE(cpu.Z);
     EXPECT_FALSE(cpu.I);
