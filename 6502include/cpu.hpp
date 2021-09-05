@@ -70,7 +70,6 @@ struct CPU {
     Byte AddressingZeroPage(unsigned int &nCycles, Mem &mem);
     Byte AddressingZeroPageX(unsigned int &nCycles, Mem &mem);
     Byte AddressingZeroPageY(unsigned int &nCycles, Mem &mem);
-    Byte AddressingRelative(unsigned int &nCycles, Mem &mem);
     Word AddressingAbsolute(unsigned int &nCycles, Mem &mem);
     Word AddressingAbsoluteX(unsigned int &nCycles, Mem &mem);
     Word AddressingAbsoluteY(unsigned int &nCycles, Mem &mem);

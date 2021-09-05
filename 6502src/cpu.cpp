@@ -1,4 +1,5 @@
 #include "cpu.hpp"
+#include <iostream> 
 
 void CPU::Execute(unsigned int nCycles, Mem &mem) {
     while (nCycles > 0) {
@@ -239,7 +240,7 @@ Word CPU::AddressingAbsoluteY(unsigned int &nCycles, Mem &mem) {
 Word CPU::AddressingIndirect(unsigned int &nCycles, Mem &mem) {
     // The instruction contains a 16 bit address which identifies the location of the least 
     //significant byte of another 16 bit memory address which is the real target of the instruction
-    Byte addr = FetchByte(nCycles, mem);
+    Word addr = FetchWord(nCycles, mem);
     return ReadWord(nCycles, addr, mem);
 
 }
