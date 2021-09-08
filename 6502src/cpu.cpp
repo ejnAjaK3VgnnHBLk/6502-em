@@ -93,13 +93,9 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
                 /* WIP:
                 The JSR instruction pushes the address (minus one) of the return point on to the stack and then sets the program counter to the target memory address.
                 */
-
-                Word jmpAddr = FetchWord(nCycles, mem); // We first get the address by fetching the next word
-                WriteWord(PC - 1, SP, nCycles, mem);         // Then write the current program counter - 1 (as per the 6502 instruction set spec.)
-                SP+=2;                                  // Increment stack pointer cuz we just wrote to the stack
-
-                PC = jmpAddr;                           // New program counter is the address we just read
-                nCycles--;                              // We used up a cycle so decrement
+                PushWord(nCycles, SP - 1, mem);
+                PC = FetchWord(nCycles, mem);
+                SP--;
             } break;
             default:
                 std::cout << "Instruction: " << std::hex << unsigned(instruction) << " not handled!\n" ;     
@@ -187,6 +183,36 @@ void CPU::WriteRegister(Byte &reg, Byte value) {
     UpdateZeroAndNegativeFlags(reg);
 }
 
+Word CPU::AddrFromPC() { return SP + 0x100; }
+
+Byte CPU::PopByte(unsigned int &nCycles, Mem &mem) {
+    Word addr = AddrFromPC();
+    SP++;
+    nCycles-=2;
+    return mem[addr];
+}
+
+Word CPU::PopWord(unsigned int &nCycles, Mem &mem) {
+    Word val = ReadWord(nCycles, AddrFromPC(), mem);
+    SP += 2;
+    nCycles--;
+    return val;
+}
+
+void CPU::PushByte(unsigned int &nCycles, Byte val, Mem &mem) {
+    Word addr = AddrFromPC();
+    WriteByte(val, addr, nCycles, mem);
+    nCycles--;
+    SP--;
+}
+
+void CPU::PushWord(unsigned int &nCycles, Word data, Mem &mem) {
+    WriteByte(data >> 8, AddrFromPC(), nCycles, mem);
+    --SP;
+    WriteByte(data - 0x100, AddrFromPC(), nCycles, mem);
+    --SP;
+}
+
 // Addressing Mode Functions
 // See (https://github.com/ejnAjaK3VgnnHBLk/6502-em/pull/20#issue-988360270) for why I don't implement
 //      some addressing modes here!
@@ -264,7 +290,7 @@ Word CPU::AddressingIndirectIndexed(unsigned int &nCycles, Mem &mem) {
 
 void CPU::Reset(Mem &mem) {
     PC = 0xFFFC;             // Initialize program counter to 0xFFC
-    SP = 0x0100;            // Inititalize stack pointer to 0x01FF
+    SP = 0xFF;            // Inititalize stack pointer to 0x01FF
     C = Z = I = D = B = V = N = 0; // Reset status flags
     A = X = Y = 0;          // Reset registers
     mem.Init();             // Reset memory
