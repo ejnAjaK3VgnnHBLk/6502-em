@@ -93,9 +93,16 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
                 /* WIP:
                 The JSR instruction pushes the address (minus one) of the return point on to the stack and then sets the program counter to the target memory address.
                 */
-                PushWord(nCycles, SP - 1, mem);
-                PC = FetchWord(nCycles, mem);
-                SP--;
+                Word target = FetchWord(nCycles, mem);
+                Word pcMinusOne = PC - 1;
+                PushWord(nCycles, pcMinusOne, mem);
+                PC = target;
+            } break;
+            case INS_RTS: {
+                // It pulls the program counter (minus one) from the stack.
+                Word PCPlusOne = PopWord(nCycles, mem) + 1;
+                PC = PCPlusOne;
+                nCycles -= 2;
             } break;
             default:
                 std::cout << "Instruction: " << std::hex << unsigned(instruction) << " not handled!\n" ;     
@@ -183,34 +190,38 @@ void CPU::WriteRegister(Byte &reg, Byte value) {
     UpdateZeroAndNegativeFlags(reg);
 }
 
-Word CPU::AddrFromPC() { return SP + 0x100; }
+Word CPU::SPToAddr() { return SP + 0x100; }
 
 Byte CPU::PopByte(unsigned int &nCycles, Mem &mem) {
-    Word addr = AddrFromPC();
+    Byte value = ReadByte(nCycles, SPToAddr(), mem);
     SP++;
-    nCycles-=2;
-    return mem[addr];
+    nCycles--;
+    return value;
 }
 
 Word CPU::PopWord(unsigned int &nCycles, Mem &mem) {
-    Word val = ReadWord(nCycles, AddrFromPC(), mem);
-    SP += 2;
-    nCycles--;
-    return val;
+    Word value = mem[SPToAddr()+1];
+    SP++;
+    value |= (mem[SPToAddr()+1] << 8);
+    nCycles-=2;
+
+    SP++;
+    nCycles -= 2;
+    return value;
 }
 
-void CPU::PushByte(unsigned int &nCycles, Byte val, Mem &mem) {
-    Word addr = AddrFromPC();
-    WriteByte(val, addr, nCycles, mem);
-    nCycles--;
+void CPU::PushByte(unsigned int &nCycles, Byte value, Mem &mem) {
+    mem[SPToAddr()] = value;
     SP--;
+    nCycles--;
 }
 
-void CPU::PushWord(unsigned int &nCycles, Word data, Mem &mem) {
-    WriteByte(data >> 8, AddrFromPC(), nCycles, mem);
-    --SP;
-    WriteByte(data - 0x100, AddrFromPC(), nCycles, mem);
-    --SP;
+void CPU::PushWord(unsigned int &nCycles, Word value, Mem &mem) {
+    mem[SPToAddr()] = value >> 8;
+    SP--;
+    mem[SPToAddr()] = value & 0xFF;
+    SP--;
+    nCycles -= 2;
 }
 
 // Addressing Mode Functions

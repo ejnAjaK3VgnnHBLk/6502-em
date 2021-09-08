@@ -77,11 +77,11 @@ struct CPU {
     Word AddressingIndexedIndirect(unsigned int &nCycles, Mem &mem);
     Word AddressingIndirectIndexed(unsigned int &nCycles, Mem &mem);
 
-    Word AddrFromPC();
+    Word SPToAddr();
     Byte PopByte(unsigned int &nCycles, Mem &mem);
     Word PopWord(unsigned int &nCycles, Mem &mem);
     void PushByte(unsigned int &nCycles, Byte val, Mem &mem);
-    void PushWord(unsigned int &nCycles, Word data, Mem &mem);
+    void PushWord(unsigned int &nCycles, Word value, Mem &mem);
 
     /*
      * Immediate: load next byte as the "argument" to the instruction.
