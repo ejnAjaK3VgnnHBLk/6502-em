@@ -8,7 +8,7 @@ struct CPU {
     Word PC;    // Program counter - 16 bit register that points to next
                 // address on the stack to be executed.
     
-    Word SP;    // Stack pointer - 8 bit register that points to next
+    Byte SP;    // Stack pointer - 8 bit register that points to next
                 // free location on the stack.
 
     Byte A;     // Accululator - 8 bit register used for all arithmetic
@@ -76,6 +76,12 @@ struct CPU {
     Word AddressingIndirect(unsigned int &nCycles, Mem &mem);
     Word AddressingIndexedIndirect(unsigned int &nCycles, Mem &mem);
     Word AddressingIndirectIndexed(unsigned int &nCycles, Mem &mem);
+
+    Word AddrFromPC();
+    Byte PopByte(unsigned int &nCycles, Mem &mem);
+    Word PopWord(unsigned int &nCycles, Mem &mem);
+    void PushByte(unsigned int &nCycles, Byte val, Mem &mem);
+    void PushWord(unsigned int &nCycles, Word data, Mem &mem);
 
     /*
      * Immediate: load next byte as the "argument" to the instruction.

@@ -79,7 +79,7 @@ TEST_F(CPUFunctionTests, WriteRegisterTest) {
 TEST_F(CPUFunctionTests, ResetTest) {
     cpu.Reset(mem);
     EXPECT_EQ(cpu.PC, 0xFFFC);
-    EXPECT_EQ(cpu.SP, 0x100);
+    EXPECT_EQ(cpu.SP, 0xFF);
     EXPECT_EQ(cpu.C, 0);
     EXPECT_EQ(cpu.Z, 0);
     EXPECT_EQ(cpu.I, 0);
@@ -195,4 +195,35 @@ TEST_F(CPUFunctionTests, AddressingIndirectIndexedTest) {
 
     Word addr = cpu.AddressingIndirectIndexed(nCycles, mem);
     EXPECT_EQ(addr, 0x8008);
+}
+
+TEST_F(CPUFunctionTests, PopByteTest) {
+    EXPECT_EQ(cpu.SP, 0xFF);
+    mem[0x1FF] = 0x69;
+
+    Byte poped = cpu.PopByte(nCycles, mem);
+    EXPECT_EQ(poped, 0x69);
+}
+
+TEST_F(CPUFunctionTests, PopWordTest) {
+    cpu.SP -= 2;
+    EXPECT_EQ(cpu.SP, 0xFD);
+    mem[0x1FD] = 0x34;
+    mem[0x1FE] = 0x12;
+
+    Word poped = cpu.PopWord(nCycles, mem);
+    EXPECT_EQ(poped, 0x1234);
+}
+
+TEST_F(CPUFunctionTests, PushByteTest) {
+    cpu.PushByte(nCycles, 0x69, mem);
+
+    EXPECT_EQ(mem[0x1FF], 0x69);
+}
+
+TEST_F(CPUFunctionTests, PushWordTest) {
+    cpu.PushWord(nCycles, 0x1234, mem);
+
+    EXPECT_EQ(mem[0x1FE], 0x34);
+    EXPECT_EQ(mem[0x1FF], 0x12);
 }
