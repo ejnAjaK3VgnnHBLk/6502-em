@@ -122,8 +122,10 @@ struct CPU {
         INS_STY_AB = 0x8C,
 
         INS_JSR = 0x20,
+        INS_RTS = 0x60,
 
-        INS_RTS = 0x60
+        INS_JMP_AB = 0x4C,
+        INS_JMP_ID = 0x6C
         ;
 
 };

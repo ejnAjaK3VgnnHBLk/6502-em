@@ -11,7 +11,7 @@
 /*
  * Not yet implemented instructions:
  *ADC AND ASL BCC BCS BEQ BIT BMI BNE BPL BRK BVC BVS CLC
- *CLD CLI CLV CMP CPX CPY DEC DEX DEY EOR INC INX INY JMP
+ *CLD CLI CLV CMP CPX CPY DEC DEX DEY EOR INC INX INY
  *LSR NOP ORA PHA PHP PLA PLP ROL ROR RTI
  *SBC SEC SED SEI TAX TAY TSX TXA TXS TYA
  */
@@ -105,9 +105,6 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
 
             // JSR instruction
             case INS_JSR: {
-                /* WIP:
-                The JSR instruction pushes the address (minus one) of the return point on to the stack and then sets the program counter to the target memory address.
-                */
                 Word target = FetchWord(nCycles, mem);
                 Word pcMinusOne = PC - 1;
                 PushWord(nCycles, pcMinusOne, mem);
@@ -119,6 +116,12 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
                 PC = PCPlusOne;
                 nCycles -= 2;
             } break;
+            case INS_JMP_AB: 
+                PC = AddressingAbsolute(nCycles, mem);
+            break;
+            case INS_JMP_ID:
+                PC = AddressingIndirect(nCycles, mem);
+            break;
             default:
                 std::cout << "Instruction: " << std::hex << unsigned(instruction) << " not handled!\n" ;     
         }break;

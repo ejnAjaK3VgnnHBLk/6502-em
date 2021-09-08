@@ -208,3 +208,26 @@ TEST_F(MemoryInstructionTests, TestSTYAbsolute) {
 
     EXPECT_EQ(mem[0x1234], 0x69);
 }
+
+TEST_F(MemoryInstructionTests, TestJMPAbsolute) {
+    mem[0x0000] = cpu.INS_JMP_AB;
+    mem[0x0001] = 0x08;
+    mem[0x0002] = 0x80;
+
+    cpu.Execute(3, mem);
+
+    EXPECT_EQ(cpu.PC, 0x8008); 
+}
+
+TEST_F(MemoryInstructionTests, TestJMPIndirect) {
+    mem[0x0000] = cpu.INS_JMP_ID;
+    mem[0x0001] = 0x08;
+    mem[0x0002] = 0x80;
+
+    mem[0x8008] = 0x42;
+    mem[0x8009] = 0x80;
+
+    cpu.Execute(5, mem);
+
+    EXPECT_EQ(cpu.PC, 0x8042);
+}
