@@ -19,13 +19,33 @@ class MemoryInstructionTests : public ::testing::Test {
 };
 
 TEST_F(MemoryInstructionTests, TestJSR) {
-
     mem[0x0000] = cpu.INS_JSR;
     mem[0x0001] = 0x69;
 
     cpu.Execute(6, mem);
 
     EXPECT_EQ(cpu.PC, 0x69);
+}
+
+TEST_F(MemoryInstructionTests, TestRTS) {
+    cpu.SP = 0x10;
+    mem[0x0000] = cpu.INS_RTS;
+
+    
+}
+
+TEST_F(MemoryInstructionTests, CanJumpToSubroutineAndBack) {
+    cpu.SP = 0x10;
+    cpu.PC = 0x1000;
+    mem[0x1000] = cpu.INS_JSR;
+	mem[0x1001] = 0x08;
+	mem[0x1002] = 0x80;
+	mem[0x8008] = cpu.INS_RTS;
+
+    cpu.Execute(6, mem);
+    cpu.Execute(6, mem);
+
+    EXPECT_EQ(cpu.PC, 0x1003);
 }
 
 TEST_F(MemoryInstructionTests, TestSTAZeroPage) {

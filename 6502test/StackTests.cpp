@@ -30,15 +30,6 @@ TEST_F(StackTests, PopByteTest) {
     EXPECT_EQ(test2, 0x21);
 }
 
-TEST_F(StackTests, PopWordTest) {
-    cpu.SP = 0x21;
-    mem[0x121] = 0x34;
-    mem[0x122] = 0x12;
-    Word cool = cpu.PopWord(nCycles, mem);
-
-    EXPECT_EQ(cool, 0x1234);
-}
-
 TEST_F(StackTests, PushByte) {
     cpu.PushByte(nCycles, 0x12, mem);
     EXPECT_EQ(mem[0x1FF], 0x12);
