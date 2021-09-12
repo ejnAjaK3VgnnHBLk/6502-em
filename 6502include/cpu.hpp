@@ -77,11 +77,18 @@ struct CPU {
     Word AddressingIndexedIndirect(unsigned int &nCycles, Mem &mem);
     Word AddressingIndirectIndexed(unsigned int &nCycles, Mem &mem);
 
+    // Stack operations
     Word SPToAddr();
     Byte PopByte(unsigned int &nCycles, Mem &mem);
     Word PopWord(unsigned int &nCycles, Mem &mem);
     void PushByte(unsigned int &nCycles, Byte val, Mem &mem);
     void PushWord(unsigned int &nCycles, Word value, Mem &mem);
+
+    void TransferRegister(Byte &src, Byte &dest);
+
+    // Arithmetic instructions
+    void lAND(Byte val);
+    void EOR(Byte val);
 
     /*
      * Immediate: load next byte as the "argument" to the instruction.
@@ -123,6 +130,52 @@ struct CPU {
 
         INS_JSR = 0x20,
         INS_RTS = 0x60,
+
+        INS_ADC_IM = 0x69,
+        INS_ADC_ZP = 0x65,
+        INS_ADC_ZPX = 0x75,
+        INS_ADC_AB = 0x6D,
+        INS_ADC_ABX = 0x7D,
+        INS_ADC_ABY = 0x79,
+        INS_ADC_IDX = 0x61,
+        INS_ADC_IDY = 0x71,
+
+        INS_TAX = 0xAA,
+        INS_TAY = 0xA8,
+        INS_TSX = 0xBA,
+        INS_TXA = 0x8A,
+        INS_TXS = 0x9A,
+        INS_TYA = 0x98,
+
+        INS_AND_IM = 0x29,
+        INS_AND_ZP = 0x25,
+        INS_AND_ZPX = 0x35,
+        INS_AND_AB = 0x2D,
+        INS_AND_ABX = 0x3D,
+        INS_AND_ABY = 0x39,
+        INS_AND_IDX = 0x21,
+        INS_AND_IDY = 0x31,
+
+        INS_EOR_IM = 0x49,
+        INS_EOR_ZP = 0x45,
+        INS_EOR_ZPX = 0x55,
+        INS_EOR_AB = 0x4D,
+        INS_EOR_ABX = 0x5D,
+        INS_EOR_ABY = 0x59,
+        INS_EOR_IDX = 0x41,
+        INS_EOR_IDY = 0x51,
+
+        INS_ORA_IM = 0x09,
+        INS_ORA_ZP = 0x05,
+        INS_ORA_ZPX = 0x15,
+        INS_ORA_AB = 0x0D,
+        INS_ORA_ABX = 0x1D,
+        INS_ORA_ABY = 0x19,
+        INS_ORA_IDX = 0x01,
+        INS_ORA_IDY = 0x11,
+
+        INS_BIT_ZP = 0x24,
+        INS_BIT_AB = 0x2C,
 
         INS_JMP_AB = 0x4C,
         INS_JMP_ID = 0x6C
