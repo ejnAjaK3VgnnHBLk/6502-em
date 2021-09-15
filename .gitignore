@@ -34,5 +34,5 @@
 build
 *.html
 *.kdev4
-.kdev/
+.kdev4/
 *.kdev4
