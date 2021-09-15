@@ -10,16 +10,142 @@
 
 /*
  * Not yet implemented instructions:
- *ADC AND ASL BCC BCS BEQ BIT BMI BNE BPL BRK BVC BVS CLC
- *CLD CLI CLV CMP CPX CPY DEC DEX DEY EOR INC INX INY
- *LSR NOP ORA PHA PHP PLA PLP ROL ROR RTI
- *SBC SEC SED SEI TAX TAY TSX TXA TXS TYA
+ *ADC ASL BCC BCS BEQ BIT BMI BNE BPL BRK BVC BVS CLC
+ *CLD CLI CLV CMP CPX CPY DEC DEX DEY INC INX INY
+ *LSR NOP PHA PHP PLA PLP ROL ROR RTI
+ *SBC SEC SED SEI
  */
+
 void CPU::Execute(unsigned int nCycles, Mem &mem) {
+    auto lAND = [&nCycles, &mem, this](Word addr) {
+        A &= ReadByte(nCycles, addr, mem);
+        UpdateZeroAndNegativeFlags(A);
+    };
+
+    auto EOR = [&nCycles, &mem, this](Word addr) {
+        A ^= ReadByte(nCycles, addr, mem);
+        UpdateZeroAndNegativeFlags(A);
+    };
+
+    auto ORA = [&nCycles, &mem, this](Word addr) {
+        A |= ReadByte(nCycles, addr, mem);
+        UpdateZeroAndNegativeFlags(A);
+    };
+
+    auto BIT = [&nCycles, &mem, this](Word addr) {
+        Byte val = ReadByte(nCycles, addr, mem);
+        V = (val & 0b1000000) > 0;
+        N = (val & 0b10000000) > 0;
+        Z = (A & val) == 0;
+    };
+
     while (nCycles > 0) {
         Byte instruction = FetchByte(nCycles, mem);
         switch (instruction) {
-            // LDA instruction
+            case INS_BIT_ZP: {
+                BIT(AddressingZeroPage(nCycles, mem));
+            } break;
+            case INS_BIT_AB: {
+                BIT(AddressingAbsolute(nCycles, mem));
+            } break;
+            // Logical, inclusive OR ---------------------------------------------------
+            case INS_ORA_IM: {
+                A |= FetchByte(nCycles, mem);
+                UpdateZeroAndNegativeFlags(A);
+            } break;
+            case INS_ORA_ZP:
+                ORA(AddressingZeroPage(nCycles, mem));
+            break;
+            case INS_ORA_ZPX:
+                ORA(AddressingZeroPageX(nCycles, mem));
+            break;
+            case INS_ORA_AB:
+                ORA(AddressingAbsolute(nCycles, mem));
+            break;
+            case INS_ORA_ABX:
+                ORA(AddressingAbsoluteX(nCycles, mem));
+            break;
+            case INS_ORA_ABY:
+                ORA(AddressingAbsoluteY(nCycles, mem));
+            break;
+            case INS_ORA_IDX:
+                ORA(AddressingIndexedIndirect(nCycles, mem));
+            break;
+            case INS_ORA_IDY:
+                ORA(AddressingIndirectIndexed(nCycles, mem));
+            break;
+            // Exclusive OR instruction ---------------------------------------------------
+            case INS_EOR_IM: {
+                A ^= FetchByte(nCycles, mem);
+                UpdateZeroAndNegativeFlags(A);
+            } break;
+            case INS_EOR_ZP: {
+                EOR(AddressingZeroPage(nCycles, mem));
+            } break;
+            case INS_EOR_ZPX: {
+                EOR(AddressingZeroPageX(nCycles, mem));
+            } break;
+            case INS_EOR_AB: {
+                EOR(AddressingAbsolute(nCycles, mem));
+            } break;
+            case INS_EOR_ABX: {
+                EOR(AddressingAbsoluteX(nCycles, mem));
+            } break;
+            case INS_EOR_ABY: {
+                EOR(AddressingAbsoluteY(nCycles, mem));
+            } break;
+            case INS_EOR_IDX: {
+                EOR(AddressingIndexedIndirect(nCycles, mem));
+            } break;
+            case INS_EOR_IDY: {
+                EOR(AddressingIndirectIndexed(nCycles, mem));
+            } break;
+            // Logical AND instruction ------------------------------------------------------
+            case INS_AND_IM: {
+                A &= FetchByte(nCycles, mem);
+                UpdateZeroAndNegativeFlags(A);
+            } break;
+            case INS_AND_ZP: {
+                lAND(AddressingZeroPage(nCycles, mem));
+            } break;
+            case INS_AND_ZPX: {
+                lAND(AddressingZeroPageX(nCycles, mem));
+            } break;
+            case INS_AND_AB: {
+                lAND(AddressingAbsolute(nCycles, mem));
+            } break;
+            case INS_AND_ABX: {
+                lAND(AddressingAbsoluteX(nCycles, mem));
+            } break;
+            case INS_AND_ABY: {
+                lAND(AddressingAbsoluteY(nCycles, mem));
+            } break;
+            case INS_AND_IDX: {
+                lAND(AddressingIndexedIndirect(nCycles, mem));
+            } break;
+            case INS_AND_IDY: {
+                lAND(AddressingIndirectIndexed(nCycles, mem));
+            } break;
+            // Transfer Instructions ----------------------------------------------------------
+            case INS_TAX:{
+                TransferRegister(A, X);
+            } break;
+            case INS_TAY: {
+                TransferRegister(A, Y);
+            } break;
+            case INS_TSX:
+                TransferRegister(SP, X);
+            break;
+            case INS_TXA:
+                TransferRegister(X, A);
+            break;
+            case INS_TXS:
+                TransferRegister(X, SP);
+            break;
+            case INS_TYA:
+                TransferRegister(Y, A);
+            break;
+            // LDA instruction ----------------------------------------------------------------
             case INS_LDA_IM:
                 WriteRegister(A, FetchByte(nCycles, mem));
             break;
@@ -44,7 +170,7 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
             case INS_LDA_IDY:
                 WriteRegister(A, ReadByte(nCycles, AddressingIndirectIndexed(nCycles, mem), mem));
             break;
-            // LDX instruction
+            // LDX instruction ----------------------------------------------------------------
             case INS_LDX_IM:
                 WriteRegister(X, FetchByte(nCycles, mem));
             break;
@@ -60,7 +186,7 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
             case INS_LDX_ABY:
                 WriteRegister(X, ReadByte(nCycles, AddressingAbsoluteY(nCycles, mem), mem)); 
             break;
-            // STA Instruction
+            // STA Instruction -----------------------------------------------------------------
             case INS_STA_ZP:
                 WriteToMemFromRegister(A, FetchByte(nCycles, mem), nCycles, mem);
             break;
@@ -82,7 +208,7 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
              case INS_STA_IDY:
                 WriteToMemFromRegister(A, AddressingIndirectIndexed(nCycles, mem), nCycles, mem);
             break;
-            // STX instruction
+            // STX instruction ------------------------------------------------------------------
             case INS_STX_ZP:
                 WriteToMemFromRegister(X, FetchByte(nCycles, mem), nCycles, mem);  
             break;
@@ -92,7 +218,7 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
             case INS_STX_AB:
                 WriteToMemFromRegister(X, FetchWord(nCycles, mem), nCycles, mem);
             break;
-            // STY instruction
+            // STY instruction ------------------------------------------------------------------
             case INS_STY_ZP:
                 WriteToMemFromRegister(Y, FetchByte(nCycles, mem), nCycles, mem);
             break;
@@ -102,8 +228,7 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
             case INS_STY_AB:
                 WriteToMemFromRegister(Y, FetchWord(nCycles, mem), nCycles, mem);
             break;
-
-            // JSR instruction
+            // JSR instruction ------------------------------------------------------------------
             case INS_JSR: {
                 Word target = FetchWord(nCycles, mem);
                 Word pcMinusOne = PC - 1;
@@ -323,4 +448,9 @@ void CPU::Reset(Mem &mem) {
     C = Z = I = D = B = V = N = 0; // Reset status flags
     A = X = Y = 0;          // Reset registers
     mem.Init();             // Reset memory
+}
+
+void CPU::TransferRegister(Byte &src, Byte &dest) {
+    dest = src;
+    UpdateZeroAndNegativeFlags(dest);
 }
