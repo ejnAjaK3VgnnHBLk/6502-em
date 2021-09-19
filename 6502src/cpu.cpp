@@ -10,7 +10,7 @@
 
 /*
  * Not yet implemented instructions:
- *ADC ASL BCC BCS BEQ BIT BMI BNE BPL BRK BVC BVS CLC
+ *ADC BCC BCS BEQ BIT BMI BNE BPL BRK BVC BVS CLC
  *CLD CLI CLV CMP CPX CPY
  *LSR NOP PHA PHP PLA PLP ROL ROR RTI
  *SBC SEC SED SEI
@@ -61,9 +61,61 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
         UpdateZeroAndNegativeFlags(reg);
     };
 
+    auto ASL = [&nCycles, &mem, this](Word addr) {
+        Byte val = ReadByte(nCycles, addr, mem);
+        C = (val & 0b10000000) > 0; // Could be wrong
+        Z = (val == 0);
+        WriteByte(val << 1, addr, nCycles, mem);
+        N = (mem[addr] & 0b10000000) > 0;
+    };
+
+    auto LSR = [&nCycles, &mem, this](Word addr) {
+        C = (mem[addr] & 0b1);
+        WriteByte(mem[addr] >> 1, addr, nCycles, mem);
+        UpdateZeroAndNegativeFlags(mem[addr]);
+    };
+
     while (nCycles > 0) {
         Byte instruction = FetchByte(nCycles, mem);
         switch (instruction) {
+            // Arithmetic Shift Left -------------------------------------------------
+            case INS_ASL_ACC: {
+                C = (A & 0b10000000) > 0; // Could be wrong
+                Z = (A == 0);
+                A = A << 1;
+                N = (A & 0b10000000) > 0;
+            } break;
+            case INS_ASL_ZP:
+                ASL(AddressingZeroPage(nCycles, mem));
+            break;
+            case INS_ASL_ZPX:
+                ASL(AddressingZeroPageX(nCycles, mem));
+            break;
+            case INS_ASL_AB:
+                ASL(AddressingAbsolute(nCycles, mem));
+            break;
+            case INS_ASL_ABX:
+                ASL(AddressingAbsoluteX(nCycles, mem));
+            break;
+            // Logical Shift Right ---------------------------------------------------
+            case INS_LSR_ACC: {
+                C = (A & 0b1);
+                A = A >> 1;
+                UpdateZeroAndNegativeFlags(A);
+            } break;
+            case INS_LSR_ZP:
+                LSR(AddressingZeroPage(nCycles, mem));
+            break;
+            case INS_LSR_ZPX:
+                LSR(AddressingZeroPageX(nCycles, mem));
+            break;
+            case INS_LSR_AB:
+                LSR(AddressingAbsolute(nCycles, mem));
+            break;
+            case INS_LSR_ABX:
+                LSR(AddressingAbsoluteX(nCycles, mem));
+            break;
+
             // Increment memory location ---------------------------------------------
             case INS_INC_ZP:
                 IncrementMem(AddressingZeroPage(nCycles, mem));
