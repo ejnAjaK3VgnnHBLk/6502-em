@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "cpu.hpp"
 
-class ArithmeticTests : public ::testing::Test {
+class LogicalTests : public ::testing::Test {
     public:
         CPU cpu;
        Mem mem;
@@ -18,7 +18,7 @@ class ArithmeticTests : public ::testing::Test {
     }
 };
 
-TEST_F(ArithmeticTests, TestANDImmediate) {
+TEST_F(LogicalTests, TestANDImmediate) {
     cpu.A = 0xFF;
 
     mem[0x0000] = cpu.INS_AND_IM;
@@ -29,7 +29,7 @@ TEST_F(ArithmeticTests, TestANDImmediate) {
     EXPECT_EQ(cpu.A, 0xaa);
 }
 
-TEST_F(ArithmeticTests, TestANDZP) {
+TEST_F(LogicalTests, TestANDZP) {
     cpu.A = 0xFF;
     mem[0x0000] = cpu.INS_AND_ZP;
     mem[0x0001] = 0x1B;
@@ -39,7 +39,7 @@ TEST_F(ArithmeticTests, TestANDZP) {
     EXPECT_EQ(cpu.A, 0xAA);
 }
 
-TEST_F(ArithmeticTests, TestANDZPX) {
+TEST_F(LogicalTests, TestANDZPX) {
     cpu.A = 0xFF;
     cpu.X = 0x10;
     mem[0x0000] = cpu.INS_AND_ZPX;
@@ -50,7 +50,7 @@ TEST_F(ArithmeticTests, TestANDZPX) {
     EXPECT_EQ(cpu.A, 0xAA);
 }
 
-TEST_F(ArithmeticTests, TestANDAbsolute) {
+TEST_F(LogicalTests, TestANDAbsolute) {
     cpu.A = 0xFF;
     mem[0x0000] = cpu.INS_AND_AB;
     mem[0x0001] = 0x08;
@@ -61,7 +61,7 @@ TEST_F(ArithmeticTests, TestANDAbsolute) {
     EXPECT_EQ(cpu.A, 0xAA);
 }
 
-TEST_F(ArithmeticTests, TestANDAbsoluteX) {
+TEST_F(LogicalTests, TestANDAbsoluteX) {
     cpu.A = 0xFF;
     cpu.X = 0x10;
     mem[0x0000] = cpu.INS_AND_ABX;
@@ -73,7 +73,7 @@ TEST_F(ArithmeticTests, TestANDAbsoluteX) {
     EXPECT_EQ(cpu.A, 0xAA);
 }
 
-TEST_F(ArithmeticTests, TestANDAbsoluteY) {
+TEST_F(LogicalTests, TestANDAbsoluteY) {
     cpu.A = 0xFF;
     cpu.Y = 0x10;
     mem[0x0000] = cpu.INS_AND_ABY;
@@ -85,7 +85,7 @@ TEST_F(ArithmeticTests, TestANDAbsoluteY) {
     EXPECT_EQ(cpu.A, 0xAA);
 }
 
-TEST_F(ArithmeticTests, TestANDIndexedIndirect) {
+TEST_F(LogicalTests, TestANDIndexedIndirect) {
     cpu.A = 0xFF;
     cpu.X = 0x10;
 
@@ -100,7 +100,7 @@ TEST_F(ArithmeticTests, TestANDIndexedIndirect) {
     EXPECT_EQ(cpu.A, 0xAA);
 }
 
-TEST_F(ArithmeticTests, TestANDIndirectIndexed) {
+TEST_F(LogicalTests, TestANDIndirectIndexed) {
     cpu.A = 0xFF;
     cpu.Y = 0x10;
 
@@ -117,7 +117,7 @@ TEST_F(ArithmeticTests, TestANDIndirectIndexed) {
 
 // EOR
 
-TEST_F(ArithmeticTests, TestEORImmediate) {
+TEST_F(LogicalTests, TestEORImmediate) {
     cpu.A = 0x1b;
 
     mem[0x0000] = cpu.INS_EOR_IM;
@@ -128,7 +128,7 @@ TEST_F(ArithmeticTests, TestEORImmediate) {
     EXPECT_EQ(cpu.A, 0xb1);
 }
 
-TEST_F(ArithmeticTests, TestEORZP) {
+TEST_F(LogicalTests, TestEORZP) {
     cpu.A = 0x1b;
     mem[0x0000] = cpu.INS_EOR_ZP;
     mem[0x0001] = 0x1B;
@@ -138,7 +138,7 @@ TEST_F(ArithmeticTests, TestEORZP) {
     EXPECT_EQ(cpu.A, 0xb1);
 }
 
-TEST_F(ArithmeticTests, TestEORZPX) {
+TEST_F(LogicalTests, TestEORZPX) {
     cpu.A = 0x1b;
     cpu.X = 0x10;
     mem[0x0000] = cpu.INS_EOR_ZPX;
@@ -149,7 +149,7 @@ TEST_F(ArithmeticTests, TestEORZPX) {
     EXPECT_EQ(cpu.A, 0xb1);
 }
 
-TEST_F(ArithmeticTests, TestEORAbsolute) {
+TEST_F(LogicalTests, TestEORAbsolute) {
     cpu.A = 0x1b;
     mem[0x0000] = cpu.INS_EOR_AB;
     mem[0x0001] = 0x08;
@@ -160,7 +160,7 @@ TEST_F(ArithmeticTests, TestEORAbsolute) {
     EXPECT_EQ(cpu.A, 0xb1);
 }
 
-TEST_F(ArithmeticTests, TestEORAbsoluteX) {
+TEST_F(LogicalTests, TestEORAbsoluteX) {
     cpu.A = 0x1b;
     cpu.X = 0x10;
     mem[0x0000] = cpu.INS_EOR_ABX;
@@ -172,7 +172,7 @@ TEST_F(ArithmeticTests, TestEORAbsoluteX) {
     EXPECT_EQ(cpu.A, 0xb1);
 }
 
-TEST_F(ArithmeticTests, TestEORAbsoluteY) {
+TEST_F(LogicalTests, TestEORAbsoluteY) {
     cpu.A = 0x1b;
     cpu.Y = 0x10;
     mem[0x0000] = cpu.INS_EOR_ABY;
@@ -184,7 +184,7 @@ TEST_F(ArithmeticTests, TestEORAbsoluteY) {
     EXPECT_EQ(cpu.A, 0xb1);
 }
 
-TEST_F(ArithmeticTests, TestEORIndexedIndirect) {
+TEST_F(LogicalTests, TestEORIndexedIndirect) {
     cpu.A = 0x1b;
     cpu.X = 0x10;
 
@@ -199,7 +199,7 @@ TEST_F(ArithmeticTests, TestEORIndexedIndirect) {
     EXPECT_EQ(cpu.A, 0xb1);
 }
 
-TEST_F(ArithmeticTests, TestEORIndirectIndexed) {
+TEST_F(LogicalTests, TestEORIndirectIndexed) {
     cpu.A = 0x1b;
     cpu.Y = 0x10;
 
@@ -216,7 +216,7 @@ TEST_F(ArithmeticTests, TestEORIndirectIndexed) {
 
 // ORA tests
 
-TEST_F(ArithmeticTests, TestORAImmediate) {
+TEST_F(LogicalTests, TestORAImmediate) {
     cpu.A = 0x1b;
 
     mem[0x0000] = cpu.INS_ORA_IM;
@@ -227,7 +227,7 @@ TEST_F(ArithmeticTests, TestORAImmediate) {
     EXPECT_EQ(cpu.A, 0xbb);
 }
 
-TEST_F(ArithmeticTests, TestORAZP) {
+TEST_F(LogicalTests, TestORAZP) {
     cpu.A = 0x1b;
     mem[0x0000] = cpu.INS_ORA_ZP;
     mem[0x0001] = 0x1B;
@@ -237,7 +237,7 @@ TEST_F(ArithmeticTests, TestORAZP) {
     EXPECT_EQ(cpu.A, 0xbb);
 }
 
-TEST_F(ArithmeticTests, TestORAZPX) {
+TEST_F(LogicalTests, TestORAZPX) {
     cpu.A = 0x1b;
     cpu.X = 0x10;
     mem[0x0000] = cpu.INS_ORA_ZPX;
@@ -248,7 +248,7 @@ TEST_F(ArithmeticTests, TestORAZPX) {
     EXPECT_EQ(cpu.A, 0xbb);
 }
 
-TEST_F(ArithmeticTests, TestORAAbsolute) {
+TEST_F(LogicalTests, TestORAAbsolute) {
     cpu.A = 0x1b;
     mem[0x0000] = cpu.INS_ORA_AB;
     mem[0x0001] = 0x08;
@@ -259,7 +259,7 @@ TEST_F(ArithmeticTests, TestORAAbsolute) {
     EXPECT_EQ(cpu.A, 0xbb);
 }
 
-TEST_F(ArithmeticTests, TestORAAbsoluteX) {
+TEST_F(LogicalTests, TestORAAbsoluteX) {
     cpu.A = 0x1b;
     cpu.X = 0x10;
     mem[0x0000] = cpu.INS_ORA_ABX;
@@ -271,7 +271,7 @@ TEST_F(ArithmeticTests, TestORAAbsoluteX) {
     EXPECT_EQ(cpu.A, 0xbb);
 }
 
-TEST_F(ArithmeticTests, TestORAAbsoluteY) {
+TEST_F(LogicalTests, TestORAAbsoluteY) {
     cpu.A = 0x1b;
     cpu.Y = 0x10;
     mem[0x0000] = cpu.INS_ORA_ABY;
@@ -283,7 +283,7 @@ TEST_F(ArithmeticTests, TestORAAbsoluteY) {
     EXPECT_EQ(cpu.A, 0xbb);
 }
 
-TEST_F(ArithmeticTests, TestORAIndexedIndirect) {
+TEST_F(LogicalTests, TestORAIndexedIndirect) {
     cpu.A = 0x1b;
     cpu.X = 0x10;
 
@@ -298,7 +298,7 @@ TEST_F(ArithmeticTests, TestORAIndexedIndirect) {
     EXPECT_EQ(cpu.A, 0xbb);
 }
 
-TEST_F(ArithmeticTests, TestORAIndirectIndexed) {
+TEST_F(LogicalTests, TestORAIndirectIndexed) {
     cpu.A = 0x1b;
     cpu.Y = 0x10;
 
@@ -313,7 +313,7 @@ TEST_F(ArithmeticTests, TestORAIndirectIndexed) {
     EXPECT_EQ(cpu.A, 0xbb);
 }
 
-TEST_F(ArithmeticTests, TestBITZeroPage) {
+TEST_F(LogicalTests, TestBITZeroPage) {
     cpu.A = 0x42;
     mem[0x0000] = cpu.INS_BIT_ZP;
     mem[0x0001] = 0x42;
@@ -330,7 +330,7 @@ TEST_F(ArithmeticTests, TestBITZeroPage) {
     EXPECT_EQ(cpu.C, 0);
 }
 
-TEST_F(ArithmeticTests, TestBITAbsolute) {
+TEST_F(LogicalTests, TestBITAbsolute) {
     cpu.A = 0x42;
     mem[0x0000] = cpu.INS_BIT_AB;
     mem[0x0001] = 0x08;

@@ -177,6 +177,22 @@ struct CPU {
         INS_BIT_ZP = 0x24,
         INS_BIT_AB = 0x2C,
 
+        INS_INC_ZP = 0xE6,
+        INS_INC_ZPX = 0xF6,
+        INS_INC_AB = 0xEE,
+        INS_INC_ABX = 0xFE,
+
+        INS_INX = 0xE8,
+
+        INS_INY = 0xC8,
+
+        INS_DEC_ZP = 0xC6,
+        INS_DEC_ZPX = 0xD6,
+        INS_DEC_AB = 0xCE,
+        INS_DEC_ABX = 0xDE,
+        INS_DEX = 0xCA,
+        INS_DEY = 0x88,
+
         INS_JMP_AB = 0x4C,
         INS_JMP_ID = 0x6C
         ;

@@ -11,7 +11,7 @@
 /*
  * Not yet implemented instructions:
  *ADC ASL BCC BCS BEQ BIT BMI BNE BPL BRK BVC BVS CLC
- *CLD CLI CLV CMP CPX CPY DEC DEX DEY INC INX INY
+ *CLD CLI CLV CMP CPX CPY
  *LSR NOP PHA PHP PLA PLP ROL ROR RTI
  *SBC SEC SED SEI
  */
@@ -39,9 +39,72 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
         Z = (A & val) == 0;
     };
 
+    auto IncrementMem = [&nCycles, &mem, this](Word addr) {
+        Byte xd = ReadByte(nCycles, addr, mem);
+        WriteByte(++xd, addr, nCycles, mem);
+        UpdateZeroAndNegativeFlags(mem[addr]);
+    };
+
+    auto IncrementReg = [&nCycles, &mem, this](Byte &reg) {
+        reg += 1;
+        UpdateZeroAndNegativeFlags(reg);
+    };
+
+    auto DecrementMem = [&nCycles, &mem, this](Word addr) {
+        Byte xd = ReadByte(nCycles, addr, mem);
+        WriteByte(--xd, addr, nCycles, mem);
+        UpdateZeroAndNegativeFlags(mem[addr]);
+    };
+
+    auto DecrementReg = [&nCycles, &mem, this](Byte &reg) {
+        reg -= 1;
+        UpdateZeroAndNegativeFlags(reg);
+    };
+
     while (nCycles > 0) {
         Byte instruction = FetchByte(nCycles, mem);
         switch (instruction) {
+            // Increment memory location ---------------------------------------------
+            case INS_INC_ZP:
+                IncrementMem(AddressingZeroPage(nCycles, mem));
+            break;
+            case INS_INC_ZPX:
+                IncrementMem(AddressingZeroPageX(nCycles, mem));
+            break;
+            case INS_INC_AB:
+                IncrementMem(AddressingAbsolute(nCycles, mem));
+            break;
+            case INS_INC_ABX:
+                IncrementMem(AddressingAbsoluteX(nCycles, mem));
+            break;
+            // Decrement memory location
+            case INS_DEC_ZP:
+                DecrementMem(AddressingZeroPage(nCycles, mem));
+            break;
+            case INS_DEC_ZPX:
+                DecrementMem(AddressingZeroPageX(nCycles, mem));
+            break;
+            case INS_DEC_AB:
+                DecrementMem(AddressingAbsolute(nCycles, mem));
+            break;
+            case INS_DEC_ABX:
+                DecrementMem(AddressingAbsoluteX(nCycles, mem));
+            break;
+            // Increment and decrement register
+            case INS_INX:
+                IncrementReg(X);
+            break;
+            case INS_INY:
+                IncrementReg(Y);
+            break;
+            case INS_DEX:
+                DecrementReg(X);
+            break;
+            case INS_DEY:
+                DecrementReg(Y);
+            break;
+
+            // BIT test ---------------------------------------------------------------
             case INS_BIT_ZP: {
                 BIT(AddressingZeroPage(nCycles, mem));
             } break;
