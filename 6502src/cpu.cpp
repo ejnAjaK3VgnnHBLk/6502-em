@@ -98,6 +98,28 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
     while (nCycles > 0) {
         Byte instruction = FetchByte(nCycles, mem);
         switch (instruction) {
+            // Status flag changes
+            case INS_CLC:
+                C = 0;
+            break;
+            case INS_CLD:
+                D = 0;
+            break;
+            case INS_CLI:
+                I = 0;
+            break;
+            case INS_CLV:
+                V = 0;
+            break;
+            case INS_SEC:
+                C = 1;
+            break;
+            case INS_SED:
+                D = 1;
+            break;
+            case INS_SEI:
+                I = 1;
+            break;
             // Rotate Right ---------------------------------------------
             case INS_ROR_ACC: {
                 Byte old = A;
