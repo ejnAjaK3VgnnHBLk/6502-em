@@ -193,6 +193,30 @@ struct CPU {
         INS_DEX = 0xCA,
         INS_DEY = 0x88,
 
+        INS_ASL_ACC = 0x0A,
+        INS_ASL_ZP = 0x06,
+        INS_ASL_ZPX = 0x16,
+        INS_ASL_AB = 0x0E,
+        INS_ASL_ABX = 0x1E,
+
+        INS_LSR_ACC = 0x4A,
+        INS_LSR_ZP = 0x46,
+        INS_LSR_ZPX = 0x56,
+        INS_LSR_AB = 0x4E,
+        INS_LSR_ABX = 0x5E,
+
+        INS_ROL_ACC = 0x2A,
+        INS_ROL_ZP = 0x26,
+        INS_ROL_ZPX = 0x36,
+        INS_ROL_AB = 0x2E,
+        INS_ROL_ABX = 0x3E,
+
+        INS_ROR_ACC = 0x6A,
+        INS_ROR_ZP = 0x66,
+        INS_ROR_ZPX = 0x76,
+        INS_ROR_AB = 0x6E,
+        INS_ROR_ABX = 0x7E,
+
         INS_JMP_AB = 0x4C,
         INS_JMP_ID = 0x6C
         ;
