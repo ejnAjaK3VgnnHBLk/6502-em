@@ -12,7 +12,7 @@
  * Not yet implemented instructions:
  *ADC BCC BCS BEQ BIT BMI BNE BPL BRK BVC BVS CLC
  *CLD CLI CLV CMP CPX CPY
- *LSR NOP PHA PHP PLA PLP ROL ROR RTI
+ *LSR NOP PHA PHP PLA PLP RTI
  *SBC SEC SED SEI
  */
 
@@ -63,10 +63,11 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
 
     auto ASL = [&nCycles, &mem, this](Word addr) {
         Byte val = ReadByte(nCycles, addr, mem);
-        C = (val & 0b10000000) > 0; // Could be wrong
+        C = (val & 0b10000000) > 0;
         Z = (val == 0);
         WriteByte(val << 1, addr, nCycles, mem);
         N = (mem[addr] & 0b10000000) > 0;
+        UpdateZeroAndNegativeFlags(mem[addr]);
     };
 
     auto LSR = [&nCycles, &mem, this](Word addr) {
@@ -75,12 +76,50 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
         UpdateZeroAndNegativeFlags(mem[addr]);
     };
 
+    auto ROL = [&nCycles, &mem, this](Word addr) {
+        Byte old = ReadByte(nCycles, addr, mem);
+        WriteByte(mem[addr] << 1, addr, nCycles, mem);
+        Byte val = ReadByte(nCycles, addr, mem) | C << 0;
+        WriteByte(val, addr, nCycles, mem);
+        C = (old & 0b10000000) > 0;
+        UpdateZeroAndNegativeFlags(mem[addr]);
+    };
+
+    auto ROR = [&nCycles, &mem, this](Word addr) {
+        Byte old = ReadByte(nCycles, addr, mem);
+        WriteByte(mem[addr] >> 1, addr, nCycles, mem); // Right shift everything
+        Byte asdf = ReadByte(nCycles, addr, mem) ;
+        asdf |= asdf << 7;
+        WriteByte(asdf, addr, nCycles, mem);
+        C = (old & 0b1);
+        UpdateZeroAndNegativeFlags(asdf);
+    };
+
     while (nCycles > 0) {
         Byte instruction = FetchByte(nCycles, mem);
         switch (instruction) {
+            // Rotate Right ---------------------------------------------
+            case INS_ROR_ACC: {
+                Byte old = A;
+                A = A >> 1; // Right shift everything
+                A |= C << 7; // Set 7th bit to C
+                C = (old & 0b1); // First bit of old is new C
+            } break;
+            case INS_ROR_ZP:
+                ROR(AddressingZeroPage(nCycles, mem));
+            break;
+            case INS_ROR_ZPX:
+                ROR(AddressingZeroPageX(nCycles, mem));
+            break;
+            case INS_ROR_AB:
+                ROR(AddressingAbsolute(nCycles, mem));
+            break;
+            case INS_ROR_ABX:
+                ROR(AddressingAbsoluteX(nCycles, mem));
+            break;
             // Arithmetic Shift Left -------------------------------------------------
             case INS_ASL_ACC: {
-                C = (A & 0b10000000) > 0; // Could be wrong
+                C = (A & 0b10000000) > 0;
                 Z = (A == 0);
                 A = A << 1;
                 N = (A & 0b10000000) > 0;
@@ -115,7 +154,27 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
             case INS_LSR_ABX:
                 LSR(AddressingAbsoluteX(nCycles, mem));
             break;
+            // Rotate left ---------------------------------------------
+            case INS_ROL_ACC: {
+                Byte old = A;
+                A = A << 1;
+                A |= C << 0;
+                C = (old & 0b10000000) > 0;
+                UpdateZeroAndNegativeFlags(A);
 
+            } break;
+            case INS_ROL_ZP:
+                ROL(AddressingZeroPage(nCycles, mem));
+            break;
+            case INS_ROL_ZPX:
+                ROL(AddressingZeroPageX(nCycles, mem));
+            break;
+            case INS_ROL_AB:
+                ROL(AddressingAbsolute(nCycles, mem));
+            break;
+            case INS_ROL_ABX:
+                ROL(AddressingAbsoluteX(nCycles, mem));
+            break;
             // Increment memory location ---------------------------------------------
             case INS_INC_ZP:
                 IncrementMem(AddressingZeroPage(nCycles, mem));
