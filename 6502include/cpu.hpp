@@ -217,6 +217,15 @@ struct CPU {
         INS_ROR_AB = 0x6E,
         INS_ROR_ABX = 0x7E,
 
+        INS_CLC = 0x18,
+        INS_CLD = 0xD8,
+        INS_CLI = 0x58,
+        INS_CLV = 0xB8,
+        INS_SEC = 0x38,
+        INS_SED = 0xF8,
+        INS_SEI = 0x78,
+
+
         INS_JMP_AB = 0x4C,
         INS_JMP_ID = 0x6C
         ;
