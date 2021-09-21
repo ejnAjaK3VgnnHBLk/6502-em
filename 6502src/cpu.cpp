@@ -10,8 +10,8 @@
 
 /*
  * Not yet implemented instructions:
- *ADC BCC BCS BEQ BIT BMI BNE BPL BVC BVS
- *CMP CPX CPY PHA PHP PLA PLP SBC
+ *ADC BCC BCS BEQ BIT BMI BNE BPL BVC BVS CMP CPX CPY
+ *SBC
  */
 
 void CPU::Execute(unsigned int nCycles, Mem &mem) {
@@ -109,6 +109,8 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
             case INS_RTI: {
                 PopStatusFlagsFromStack(nCycles, mem);
                 PC = PopWord(nCycles, mem);
+                SF.B = 0;
+                SF.na = 0;
             } break;
             // Status flag changes
             case INS_CLC:
@@ -353,6 +355,20 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
             case INS_TYA:
                 TransferRegister(Y, A);
             break;
+            // Various stack operations
+            case INS_PHA:
+                PushByte(nCycles, A, mem);
+            break;
+            case INS_PHP:
+                PushStatusFlagsToStack(nCycles, mem);
+            break;
+            case INS_PLA:
+                A = PopByte(nCycles, mem);
+                UpdateZeroAndNegativeFlags(A);
+            break;
+            case INS_PLP:
+                PopStatusFlagsFromStack(nCycles, mem);
+            break;
             // LDA instruction ----------------------------------------------------------------
             case INS_LDA_IM:
                 WriteRegister(A, FetchByte(nCycles, mem));
@@ -393,6 +409,22 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
             break;
             case INS_LDX_ABY:
                 WriteRegister(X, ReadByte(nCycles, AddressingAbsoluteY(nCycles, mem), mem)); 
+            break;
+            // LDY instruction ----------------------------------------------------------------
+            case INS_LDY_IM:
+                WriteRegister(Y, FetchByte(nCycles, mem));
+            break;
+            case INS_LDY_ZP:
+                WriteRegister(Y, ReadByte(nCycles, FetchByte(nCycles, mem), mem));
+            break;
+            case INS_LDY_ZPX:
+                WriteRegister(Y, ReadByte(nCycles, AddressingZeroPageY(nCycles, mem), mem));
+            break;
+            case INS_LDY_AB:
+                WriteRegister(Y, ReadByte(nCycles, AddressingAbsolute(nCycles, mem), mem));
+            break;
+            case INS_LDY_ABX:
+                WriteRegister(Y, ReadByte(nCycles, AddressingAbsoluteY(nCycles, mem), mem));
             break;
             // STA Instruction -----------------------------------------------------------------
             case INS_STA_ZP:
@@ -467,8 +499,6 @@ void CPU::PushStatusFlagsToStack(unsigned int &nCycles, Mem &mem) {
 
 void CPU::PopStatusFlagsFromStack(unsigned int &nCycles, Mem &mem) {
     PSF = PopByte(nCycles, mem);
-    SF.B = 0;
-    SF.na = 0;
 }
 
 void CPU::debugReport() {

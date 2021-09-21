@@ -35,3 +35,29 @@ TEST_F(StackTests, PushByte) {
     EXPECT_EQ(mem[0x1FF], 0x12);
     EXPECT_EQ(cpu.SP, 0xFE);
 }
+
+TEST_F(StackTests, TestPHAAndPLA) {
+    cpu.A = 0x42;
+    mem[0x0] = cpu.INS_PHA;
+    cpu.Execute(3, mem);
+
+    EXPECT_EQ(mem[0x1FF], 0x42);
+    cpu.A = 0x66;
+    mem[0x1] = cpu.INS_PLA;
+    cpu.Execute(4, mem);
+
+    EXPECT_EQ(cpu.A, 0x42);
+}
+
+TEST_F(StackTests, TestPHPAndPLP) {
+    cpu.PSF = 0b10101010;
+    mem[0x0] = cpu.INS_PHP;
+
+    cpu.Execute(3, mem);
+    EXPECT_EQ(mem[0x1FF], 0b10101010);
+
+    mem[0x1] = cpu.INS_PLP;
+    cpu.Execute(4, mem);
+
+    EXPECT_EQ(cpu.PSF, 0b10101010);
+}
