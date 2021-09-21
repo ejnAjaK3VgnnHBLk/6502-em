@@ -10,8 +10,8 @@
 
 /*
  * Not yet implemented instructions:
- *ADC BCC BCS BEQ BIT BMI BNE BPL BRK BVC BVS
- *CMP CPX CPY NOP PHA PHP PLA PLP RTI SBC
+ *ADC BCC BCS BEQ BIT BMI BNE BPL BVC BVS
+ *CMP CPX CPY PHA PHP PLA PLP SBC
  */
 
 void CPU::Execute(unsigned int nCycles, Mem &mem) {
