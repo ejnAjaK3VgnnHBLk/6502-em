@@ -250,6 +250,15 @@ struct CPU {
         INS_PLA = 0x68,
         INS_PLP = 0x28,
 
+        INS_BCC = 0x90,
+        INS_BCS = 0xB0,
+        INS_BEQ = 0xF0,
+        INS_BMI = 0x30,
+        INS_BNE = 0xD0,
+        INS_BPL = 0x10,
+        INS_BVC = 0x50,
+        INS_BVS = 0x70,
+
         INS_JMP_AB = 0x4C,
         INS_JMP_ID = 0x6C
         ;
