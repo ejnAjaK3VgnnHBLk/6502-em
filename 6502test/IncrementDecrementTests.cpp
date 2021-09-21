@@ -28,13 +28,13 @@ TEST_F(IncrementDecrementTests, TestIncrementZeroPage) {
 
 
     EXPECT_EQ(mem[0x42], 0x69);
-    EXPECT_FALSE(cpu.C);
-    EXPECT_FALSE(cpu.Z);
-    EXPECT_FALSE(cpu.I);
-    EXPECT_FALSE(cpu.D);
-    EXPECT_FALSE(cpu.B);
-    EXPECT_FALSE(cpu.V);
-    EXPECT_FALSE(cpu.N);
+    EXPECT_FALSE(cpu.SF.C);
+    EXPECT_FALSE(cpu.SF.Z);
+    EXPECT_FALSE(cpu.SF.I);
+    EXPECT_FALSE(cpu.SF.D);
+    EXPECT_FALSE(cpu.SF.B);
+    EXPECT_FALSE(cpu.SF.V);
+    EXPECT_FALSE(cpu.SF.N);
 }
 
 TEST_F(IncrementDecrementTests, TestDecrementZeroPage) {
@@ -47,13 +47,13 @@ TEST_F(IncrementDecrementTests, TestDecrementZeroPage) {
 
 
     EXPECT_EQ(mem[0x42], 0x69);
-    EXPECT_FALSE(cpu.C);
-    EXPECT_FALSE(cpu.Z);
-    EXPECT_FALSE(cpu.I);
-    EXPECT_FALSE(cpu.D);
-    EXPECT_FALSE(cpu.B);
-    EXPECT_FALSE(cpu.V);
-    EXPECT_FALSE(cpu.N);
+    EXPECT_FALSE(cpu.SF.C);
+    EXPECT_FALSE(cpu.SF.Z);
+    EXPECT_FALSE(cpu.SF.I);
+    EXPECT_FALSE(cpu.SF.D);
+    EXPECT_FALSE(cpu.SF.B);
+    EXPECT_FALSE(cpu.SF.V);
+    EXPECT_FALSE(cpu.SF.N);
 }
 
 TEST_F(IncrementDecrementTests, TestIncrementX) {
@@ -64,13 +64,13 @@ TEST_F(IncrementDecrementTests, TestIncrementX) {
     cpu.Execute(1, mem);
 
     EXPECT_EQ(cpu.X, 0x2);
-    EXPECT_FALSE(cpu.C);
-    EXPECT_FALSE(cpu.Z);
-    EXPECT_FALSE(cpu.I);
-    EXPECT_FALSE(cpu.D);
-    EXPECT_FALSE(cpu.B);
-    EXPECT_FALSE(cpu.V);
-    EXPECT_FALSE(cpu.N);
+    EXPECT_FALSE(cpu.SF.C);
+    EXPECT_FALSE(cpu.SF.Z);
+    EXPECT_FALSE(cpu.SF.I);
+    EXPECT_FALSE(cpu.SF.D);
+    EXPECT_FALSE(cpu.SF.B);
+    EXPECT_FALSE(cpu.SF.V);
+    EXPECT_FALSE(cpu.SF.N);
 }
 
 TEST_F(IncrementDecrementTests, TestDecrementX) {
@@ -81,13 +81,13 @@ TEST_F(IncrementDecrementTests, TestDecrementX) {
     cpu.Execute(1, mem);
 
     EXPECT_EQ(cpu.X, 0x1);
-    EXPECT_FALSE(cpu.C);
-    EXPECT_FALSE(cpu.Z);
-    EXPECT_FALSE(cpu.I);
-    EXPECT_FALSE(cpu.D);
-    EXPECT_FALSE(cpu.B);
-    EXPECT_FALSE(cpu.V);
-    EXPECT_FALSE(cpu.N);
+    EXPECT_FALSE(cpu.SF.C);
+    EXPECT_FALSE(cpu.SF.Z);
+    EXPECT_FALSE(cpu.SF.I);
+    EXPECT_FALSE(cpu.SF.D);
+    EXPECT_FALSE(cpu.SF.B);
+    EXPECT_FALSE(cpu.SF.V);
+    EXPECT_FALSE(cpu.SF.N);
 }
 
 TEST_F(IncrementDecrementTests, TestIncrementY) {
@@ -97,13 +97,13 @@ TEST_F(IncrementDecrementTests, TestIncrementY) {
     cpu.Execute(4, mem);
 
     EXPECT_EQ(cpu.Y, 0x42);
-    EXPECT_FALSE(cpu.C);
-    EXPECT_FALSE(cpu.Z);
-    EXPECT_FALSE(cpu.I);
-    EXPECT_FALSE(cpu.D);
-    EXPECT_FALSE(cpu.B);
-    EXPECT_FALSE(cpu.V);
-    EXPECT_FALSE(cpu.N);
+    EXPECT_FALSE(cpu.SF.C);
+    EXPECT_FALSE(cpu.SF.Z);
+    EXPECT_FALSE(cpu.SF.I);
+    EXPECT_FALSE(cpu.SF.D);
+    EXPECT_FALSE(cpu.SF.B);
+    EXPECT_FALSE(cpu.SF.V);
+    EXPECT_FALSE(cpu.SF.N);
 }
 
 TEST_F(IncrementDecrementTests, TestDecrementY) {
@@ -113,11 +113,11 @@ TEST_F(IncrementDecrementTests, TestDecrementY) {
     cpu.Execute(3, mem);
 
     EXPECT_EQ(cpu.Y, 0x0);
-    EXPECT_FALSE(cpu.C);
-    EXPECT_TRUE(cpu.Z);
-    EXPECT_FALSE(cpu.I);
-    EXPECT_FALSE(cpu.D);
-    EXPECT_FALSE(cpu.B);
-    EXPECT_FALSE(cpu.V);
-    EXPECT_FALSE(cpu.N);
+    EXPECT_FALSE(cpu.SF.C);
+    EXPECT_TRUE(cpu.SF.Z);
+    EXPECT_FALSE(cpu.SF.I);
+    EXPECT_FALSE(cpu.SF.D);
+    EXPECT_FALSE(cpu.SF.B);
+    EXPECT_FALSE(cpu.SF.V);
+    EXPECT_FALSE(cpu.SF.N);
 }

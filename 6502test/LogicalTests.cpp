@@ -321,13 +321,13 @@ TEST_F(LogicalTests, TestBITZeroPage) {
 
     cpu.Execute(3, mem);
 
-    EXPECT_EQ(cpu.V, 1);
-    EXPECT_EQ(cpu.N, 1);
-    EXPECT_EQ(cpu.B, 0);
-    EXPECT_EQ(cpu.D, 0);
-    EXPECT_EQ(cpu.I, 0);
-    EXPECT_EQ(cpu.Z, 0);
-    EXPECT_EQ(cpu.C, 0);
+    EXPECT_EQ(cpu.SF.V, 1);
+    EXPECT_EQ(cpu.SF.N, 1);
+    EXPECT_EQ(cpu.SF.B, 0);
+    EXPECT_EQ(cpu.SF.D, 0);
+    EXPECT_EQ(cpu.SF.I, 0);
+    EXPECT_EQ(cpu.SF.Z, 0);
+    EXPECT_EQ(cpu.SF.C, 0);
 }
 
 TEST_F(LogicalTests, TestBITAbsolute) {
@@ -339,11 +339,11 @@ TEST_F(LogicalTests, TestBITAbsolute) {
 
     cpu.Execute(3, mem);
 
-    EXPECT_EQ(cpu.V, 1);
-    EXPECT_EQ(cpu.N, 1);
-    EXPECT_EQ(cpu.B, 0);
-    EXPECT_EQ(cpu.D, 0);
-    EXPECT_EQ(cpu.I, 0);
-    EXPECT_EQ(cpu.Z, 0);
-    EXPECT_EQ(cpu.C, 0);
+    EXPECT_EQ(cpu.SF.V, 1);
+    EXPECT_EQ(cpu.SF.N, 1);
+    EXPECT_EQ(cpu.SF.B, 0);
+    EXPECT_EQ(cpu.SF.D, 0);
+    EXPECT_EQ(cpu.SF.I, 0);
+    EXPECT_EQ(cpu.SF.Z, 0);
+    EXPECT_EQ(cpu.SF.C, 0);
 }

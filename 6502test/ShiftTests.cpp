@@ -26,9 +26,9 @@ TEST_F(ShiftTests, TestASLAccumulator) {
     cpu.Execute(2, mem);
 
     EXPECT_EQ(cpu.A, 0b01010100);
-    EXPECT_TRUE(cpu.C);
-    EXPECT_FALSE(cpu.N);
-    EXPECT_FALSE(cpu.Z);
+    EXPECT_TRUE(cpu.SF.C);
+    EXPECT_FALSE(cpu.SF.N);
+    EXPECT_FALSE(cpu.SF.Z);
 }
 
 TEST_F(ShiftTests, TestASLZeroPage) {
@@ -40,9 +40,9 @@ TEST_F(ShiftTests, TestASLZeroPage) {
     cpu.Execute(5, mem);
 
     EXPECT_EQ(mem[0x42], 0b01010100);
-    EXPECT_TRUE(cpu.C);
-    EXPECT_FALSE(cpu.N);
-    EXPECT_FALSE(cpu.Z);
+    EXPECT_TRUE(cpu.SF.C);
+    EXPECT_FALSE(cpu.SF.N);
+    EXPECT_FALSE(cpu.SF.Z);
 }
 
 TEST_F(ShiftTests, TestLSRAccumulator) {
@@ -52,9 +52,9 @@ TEST_F(ShiftTests, TestLSRAccumulator) {
     cpu.Execute(2, mem);
 
     EXPECT_EQ(cpu.A, 0b01010101);
-    EXPECT_TRUE(cpu.C);
-    EXPECT_FALSE(cpu.Z);
-    EXPECT_FALSE(cpu.N);
+    EXPECT_TRUE(cpu.SF.C);
+    EXPECT_FALSE(cpu.SF.Z);
+    EXPECT_FALSE(cpu.SF.N);
 }
 
 TEST_F(ShiftTests, TestLSRZeroPage) {
@@ -65,25 +65,25 @@ TEST_F(ShiftTests, TestLSRZeroPage) {
 
     cpu.Execute(5, mem);
     EXPECT_EQ(mem[0x42], 0b01010101);
-    EXPECT_TRUE(cpu.C);
-    EXPECT_FALSE(cpu.Z);
-    EXPECT_FALSE(cpu.N);
+    EXPECT_TRUE(cpu.SF.C);
+    EXPECT_FALSE(cpu.SF.Z);
+    EXPECT_FALSE(cpu.SF.N);
 }
 
 TEST_F(ShiftTests, TestROLAccumulator) {
     cpu.A = 0b10101010;
-    cpu.C = 1;
+    cpu.SF.C = 1;
 
     mem[0x0000] = cpu.INS_ROL_ACC;
 
     cpu.Execute(2, mem);
 
     EXPECT_EQ(cpu.A, 0b01010101);
-    EXPECT_TRUE(cpu.C);
+    EXPECT_TRUE(cpu.SF.C);
 }
 
 TEST_F(ShiftTests, TestROLZeroPage) {
-    cpu.C = 1;
+    cpu.SF.C = 1;
 
     mem[0x0000] = cpu.INS_ROL_ZP;
     mem[0x0001] = 0x42;
@@ -93,13 +93,13 @@ TEST_F(ShiftTests, TestROLZeroPage) {
     cpu.Execute(5, mem);
 
     EXPECT_EQ(mem[0x42], 0b01010101);
-    EXPECT_TRUE(cpu.C);
-    EXPECT_FALSE(cpu.Z);
-    EXPECT_FALSE(cpu.N);
+    EXPECT_TRUE(cpu.SF.C);
+    EXPECT_FALSE(cpu.SF.Z);
+    EXPECT_FALSE(cpu.SF.N);
 }
 
 TEST_F(ShiftTests, TestRORAccumulator) {
-    cpu.C = 1;
+    cpu.SF.C = 1;
     cpu.A = 0b10101010;
 
     mem[0x0000] = cpu.INS_ROR_ACC;
@@ -107,12 +107,12 @@ TEST_F(ShiftTests, TestRORAccumulator) {
     cpu.Execute(2, mem);
 
     EXPECT_EQ(cpu.A, 0b11010101);
-    EXPECT_FALSE(cpu.C);
+    EXPECT_FALSE(cpu.SF.C);
 
 }
 
 TEST_F(ShiftTests, TestRORZeroPage) {
-    cpu.C = 1;
+    cpu.SF.C = 1;
 
     mem[0x0000] = cpu.INS_ROR_ZP;
     mem[0x0001] = 0x42;
@@ -121,5 +121,5 @@ TEST_F(ShiftTests, TestRORZeroPage) {
     cpu.Execute(5, mem);
 
     EXPECT_EQ(mem[0x42], 0b11010101);
-    EXPECT_FALSE(cpu.C);
+    EXPECT_FALSE(cpu.SF.C);
 }
