@@ -93,9 +93,47 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
         UpdateZeroAndNegativeFlags(asdf);
     };
 
+    auto Branch = [&nCycles, &mem, this](bool test, bool val) {
+        Byte displacement = FetchByte(nCycles, mem);
+        if (test == val) {
+            Word oldPC = PC;
+
+            PC+=displacement;
+            nCycles--;
+
+            if ((oldPC >> 8) != (PC >> 8))
+                nCycles--;
+        }
+    };
+
     while (nCycles > 0) {
         Byte instruction = FetchByte(nCycles, mem);
         switch (instruction) {
+            // Branch Functions
+            case INS_BCC: {
+                Branch(SF.C, false);
+            } break;
+            case INS_BCS:
+                Branch(SF.C, true);
+            break;
+            case INS_BEQ:
+                Branch(SF.Z, true);
+            break;
+            case INS_BMI:
+                Branch(SF.N, true);
+            break;
+            case INS_BNE:
+                Branch(SF.Z, false);
+            break;
+            case INS_BPL:
+                Branch(SF.N, false);
+            break;
+            case INS_BVC:
+                Branch(SF.V, false);
+            break;
+            case INS_BVS:
+                Branch(SF.V, true);
+            break;
             // System Functions
             case INS_NOP:
                 nCycles -= 2;
