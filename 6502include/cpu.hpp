@@ -122,6 +122,12 @@ struct CPU {
         INS_LDX_AB = 0xAE,
         INS_LDX_ABY = 0xBE,
 
+        INS_LDY_IM = 0xA0,
+        INS_LDY_ZP = 0xA4,
+        INS_LDY_ZPX = 0xB4,
+        INS_LDY_AB = 0xAC,
+        INS_LDY_ABX = 0xBC,
+
         INS_STA_ZP = 0x85,
         INS_STA_ZPX = 0x95,
         INS_STA_AB = 0x8D,
@@ -239,6 +245,10 @@ struct CPU {
         INS_NOP = 0xEA,
         INS_RTI = 0x40,
 
+        INS_PHA = 0x48,
+        INS_PHP = 0x08,
+        INS_PLA = 0x68,
+        INS_PLP = 0x28,
 
         INS_JMP_AB = 0x4C,
         INS_JMP_ID = 0x6C
