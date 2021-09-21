@@ -18,6 +18,35 @@ class MemoryInstructionTests : public ::testing::Test {
     }
 };
 
+TEST_F(MemoryInstructionTests, TestBRK) {
+    mem[0xFFFE] = 0x00;
+    mem[0xFFFF] = 0x10;
+
+
+    cpu.PSF = 0b10101010;
+    mem[0x0] = cpu.INS_BRK;
+
+    cpu.Execute(2, mem);
+
+    EXPECT_EQ(mem[0x1FF], 0x0);
+    EXPECT_EQ(mem[0x1FE], 0x2);
+    EXPECT_EQ(mem[0x1FD], 0b10101010);
+    EXPECT_EQ(cpu.PC, 0x1000);
+
+
+   mem[0x1000] = cpu.INS_NOP;
+   cpu.Execute(2, mem);
+
+    cpu.PSF = 0b11101111;
+
+    mem[0x1001] = cpu.INS_RTI;
+    cpu.Execute(5, mem);
+
+    EXPECT_EQ(cpu.PC, 0x2);
+    EXPECT_EQ(cpu.PSF, 0b10001010); // Remember that RTI flips B to a 0
+
+}
+
 TEST_F(MemoryInstructionTests, TestJSR) {
     mem[0x0000] = cpu.INS_JSR;
     mem[0x0001] = 0x69;

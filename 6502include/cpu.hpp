@@ -4,6 +4,21 @@
 #include <iostream>
 #include "mem.hpp"
 
+struct StatusFlags {
+    // Processor status flags: only 1 bit long and are technically supposed to
+    // be in a single byte. In order these flags are: the carry flag, the zero
+    // flag, the interrupt disable flag, the decimal mode flag, the break command
+    // flag, the overflow flag, and the negative flag.
+    Byte C : 1;
+    Byte Z : 1;
+    Byte I : 1;
+    Byte D : 1;
+    Byte B : 1;
+    Byte na : 1; // Not used bit
+    Byte V : 1;
+    Byte N : 1;
+};
+
 struct CPU {
     Word PC;    // Program counter - 16 bit register that points to next
                 // address on the stack to be executed.
@@ -20,17 +35,10 @@ struct CPU {
     Byte Y;     // Index Reigster Y - 8 bit register for counter or offset
                 // memory addresses
 
-    // Processor status flags: only 1 bit long and are technically supposed to
-    // be in a single byte. In order these flags are: the carry flag, the zero
-    // flag, the interrupt disable flag, the decimal mode flag, the break command
-    // flag, the overflow flag, and the negative flag.
-    Byte C : 1; 
-    Byte Z : 1;
-    Byte I : 1;
-    Byte D : 1;
-    Byte B : 1;
-    Byte V : 1;
-    Byte N : 1;
+    union {
+        Byte PSF;
+        struct StatusFlags SF;
+    };
 
     // Read byte from memory, increment program counter and decrement nCycles
     Byte FetchByte(unsigned int &nCycles, Mem &mem);
@@ -83,6 +91,8 @@ struct CPU {
     Word PopWord(unsigned int &nCycles, Mem &mem);
     void PushByte(unsigned int &nCycles, Byte val, Mem &mem);
     void PushWord(unsigned int &nCycles, Word value, Mem &mem);
+    void PushStatusFlagsToStack(unsigned int &nCycles, Mem &mem);
+    void PopStatusFlagsFromStack(unsigned int &nCycles, Mem &mem);
 
     void TransferRegister(Byte &src, Byte &dest);
 
@@ -224,6 +234,10 @@ struct CPU {
         INS_SEC = 0x38,
         INS_SED = 0xF8,
         INS_SEI = 0x78,
+
+        INS_BRK = 0x00,
+        INS_NOP = 0xEA,
+        INS_RTI = 0x40,
 
 
         INS_JMP_AB = 0x4C,

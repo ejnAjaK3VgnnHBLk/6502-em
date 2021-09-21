@@ -80,13 +80,13 @@ TEST_F(CPUFunctionTests, ResetTest) {
     cpu.Reset(mem);
     EXPECT_EQ(cpu.PC, 0xFFFC);
     EXPECT_EQ(cpu.SP, 0xFF);
-    EXPECT_EQ(cpu.C, 0);
-    EXPECT_EQ(cpu.Z, 0);
-    EXPECT_EQ(cpu.I, 0);
-    EXPECT_EQ(cpu.D, 0);
-    EXPECT_EQ(cpu.B, 0);
-    EXPECT_EQ(cpu.V, 0);
-    EXPECT_EQ(cpu.N, 0);
+    EXPECT_EQ(cpu.SF.C, 0);
+    EXPECT_EQ(cpu.SF.Z, 0);
+    EXPECT_EQ(cpu.SF.I, 0);
+    EXPECT_EQ(cpu.SF.D, 0);
+    EXPECT_EQ(cpu.SF.B, 0);
+    EXPECT_EQ(cpu.SF.V, 0);
+    EXPECT_EQ(cpu.SF.N, 0);
     EXPECT_EQ(cpu.A, 0);
     EXPECT_EQ(cpu.X, 0);
     EXPECT_EQ(cpu.Y, 0);
@@ -96,13 +96,13 @@ TEST_F(CPUFunctionTests, ResetTest) {
 TEST_F(CPUFunctionTests, UpdateZeroAndNegativeFlagsTest) {
     cpu.A = 0xFF;
     cpu.UpdateZeroAndNegativeFlags(cpu.A);
-    EXPECT_EQ(cpu.N, 1);
-    EXPECT_EQ(cpu.Z, 0);
+    EXPECT_EQ(cpu.SF.N, 1);
+    EXPECT_EQ(cpu.SF.Z, 0);
 
     cpu.A = 0x00;
     cpu.UpdateZeroAndNegativeFlags(cpu.A);
-    EXPECT_EQ(cpu.N, 0);
-    EXPECT_EQ(cpu.Z, 1);
+    EXPECT_EQ(cpu.SF.N, 0);
+    EXPECT_EQ(cpu.SF.Z, 1);
 }
 
 TEST_F(CPUFunctionTests, AddressingZeroPageTest) {
@@ -197,16 +197,38 @@ TEST_F(CPUFunctionTests, AddressingIndirectIndexedTest) {
     EXPECT_EQ(addr, 0x8008);
 }
 
-TEST_F(CPUFunctionTests, PopByteTest) {
-    EXPECT_EQ(cpu.SP, 0xFF);
-    mem[0x1FF] = 0x69;
-
-    Byte poped = cpu.PopByte(nCycles, mem);
-    EXPECT_EQ(poped, 0x69);
+TEST_F(CPUFunctionTests, PushPopByteTest) {
+    cpu.PushByte(nCycles, 0x42, mem);
+    Byte val = cpu.PopByte(nCycles, mem);
+    EXPECT_EQ(val, 0x42);
 }
 
-TEST_F(CPUFunctionTests, PushByteTest) {
-    cpu.PushByte(nCycles, 0x69, mem);
-
-    EXPECT_EQ(mem[0x1FF], 0x69);
+TEST_F(CPUFunctionTests, PushPopStatusFlagsOnStack) {
+    cpu.SF.N = 0;
+    cpu.SF.V = 1;
+    cpu.SF.na = 0;
+    cpu.SF.B = 0;
+    cpu.SF.D = 1;
+    cpu.SF.I = 0;
+    cpu.SF.Z = 1;
+    cpu.SF.C = 0;
+    cpu.PushStatusFlagsToStack(nCycles, mem);
+    EXPECT_EQ(mem[0x1FF], 0b1001010);
+    cpu.SF.N = 0;
+    cpu.SF.V = 0;
+    cpu.SF.na = 0;
+    cpu.SF.B = 0;
+    cpu.SF.D = 0;
+    cpu.SF.I = 0;
+    cpu.SF.Z = 0;
+    cpu.SF.C = 0;
+    cpu.PopStatusFlagsFromStack(nCycles, mem);
+    EXPECT_EQ(cpu.SF.N, 0);
+    EXPECT_EQ(cpu.SF.V, 1);
+    EXPECT_EQ(cpu.SF.na, 0);
+    EXPECT_EQ(cpu.SF.B, 0);
+    EXPECT_EQ(cpu.SF.D, 1);
+    EXPECT_EQ(cpu.SF.I, 0);
+    EXPECT_EQ(cpu.SF.Z, 1);
+    EXPECT_EQ(cpu.SF.C, 0);
 }

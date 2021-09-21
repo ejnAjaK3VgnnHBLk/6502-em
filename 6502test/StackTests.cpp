@@ -20,8 +20,8 @@ class StackTests : public ::testing::Test {
 };
 
 TEST_F(StackTests, PopByteTest) {
-    mem[0x1FF] = 0x14;
-    mem[0x100] = 0x21;
+    mem[0x100] = 0x14;
+    mem[0x101] = 0x21;
 
     Byte test1 = cpu.PopByte(nCycles, mem);
     Byte test2 = cpu.PopByte(nCycles, mem);

@@ -32,9 +32,9 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
 
     auto BIT = [&nCycles, &mem, this](Word addr) {
         Byte val = ReadByte(nCycles, addr, mem);
-        V = (val & 0b1000000) > 0;
-        N = (val & 0b10000000) > 0;
-        Z = (A & val) == 0;
+        SF.V = (val & 0b1000000) > 0;
+        SF.N = (val & 0b10000000) > 0;
+        SF.Z = (A & val) == 0;
     };
 
     auto IncrementMem = [&nCycles, &mem, this](Word addr) {
@@ -61,15 +61,15 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
 
     auto ASL = [&nCycles, &mem, this](Word addr) {
         Byte val = ReadByte(nCycles, addr, mem);
-        C = (val & 0b10000000) > 0;
-        Z = (val == 0);
+        SF.C = (val & 0b10000000) > 0;
+        SF.Z = (val == 0);
         WriteByte(val << 1, addr, nCycles, mem);
-        N = (mem[addr] & 0b10000000) > 0;
+        SF.N = (mem[addr] & 0b10000000) > 0;
         UpdateZeroAndNegativeFlags(mem[addr]);
     };
 
     auto LSR = [&nCycles, &mem, this](Word addr) {
-        C = (mem[addr] & 0b1);
+        SF.C = (mem[addr] & 0b1);
         WriteByte(mem[addr] >> 1, addr, nCycles, mem);
         UpdateZeroAndNegativeFlags(mem[addr]);
     };
@@ -77,9 +77,9 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
     auto ROL = [&nCycles, &mem, this](Word addr) {
         Byte old = ReadByte(nCycles, addr, mem);
         WriteByte(mem[addr] << 1, addr, nCycles, mem);
-        Byte val = ReadByte(nCycles, addr, mem) | C << 0;
+        Byte val = ReadByte(nCycles, addr, mem) | SF.C << 0;
         WriteByte(val, addr, nCycles, mem);
-        C = (old & 0b10000000) > 0;
+        SF.C = (old & 0b10000000) > 0;
         UpdateZeroAndNegativeFlags(mem[addr]);
     };
 
@@ -89,41 +89,55 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
         Byte asdf = ReadByte(nCycles, addr, mem) ;
         asdf |= asdf << 7;
         WriteByte(asdf, addr, nCycles, mem);
-        C = (old & 0b1);
+        SF.C = (old & 0b1);
         UpdateZeroAndNegativeFlags(asdf);
     };
 
     while (nCycles > 0) {
         Byte instruction = FetchByte(nCycles, mem);
         switch (instruction) {
+            // System Functions
+            case INS_NOP:
+                nCycles -= 2;
+            break;
+            case INS_BRK: {
+                PushWord(nCycles, PC + 1, mem);
+                PushStatusFlagsToStack(nCycles, mem);
+                PC = ReadWord(nCycles, 0xFFFE, mem);
+                SF.B = 1;
+            } break;
+            case INS_RTI: {
+                PopStatusFlagsFromStack(nCycles, mem);
+                PC = PopWord(nCycles, mem);
+            } break;
             // Status flag changes
             case INS_CLC:
-                C = 0;
+                SF.C = 0;
             break;
             case INS_CLD:
-                D = 0;
+                SF.D = 0;
             break;
             case INS_CLI:
-                I = 0;
+                SF.I = 0;
             break;
             case INS_CLV:
-                V = 0;
+                SF.V = 0;
             break;
             case INS_SEC:
-                C = 1;
+                SF.C = 1;
             break;
             case INS_SED:
-                D = 1;
+                SF.D = 1;
             break;
             case INS_SEI:
-                I = 1;
+                SF.I = 1;
             break;
             // Rotate Right ---------------------------------------------
             case INS_ROR_ACC: {
                 Byte old = A;
                 A = A >> 1; // Right shift everything
-                A |= C << 7; // Set 7th bit to C
-                C = (old & 0b1); // First bit of old is new C
+                A |= SF.C << 7; // Set 7th bit to C
+                SF.C = (old & 0b1); // First bit of old is new C
             } break;
             case INS_ROR_ZP:
                 ROR(AddressingZeroPage(nCycles, mem));
@@ -139,10 +153,10 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
             break;
             // Arithmetic Shift Left -------------------------------------------------
             case INS_ASL_ACC: {
-                C = (A & 0b10000000) > 0;
-                Z = (A == 0);
+                SF.C = (A & 0b10000000) > 0;
+                SF.Z = (A == 0);
                 A = A << 1;
-                N = (A & 0b10000000) > 0;
+                SF.N = (A & 0b10000000) > 0;
             } break;
             case INS_ASL_ZP:
                 ASL(AddressingZeroPage(nCycles, mem));
@@ -158,7 +172,7 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
             break;
             // Logical Shift Right ---------------------------------------------------
             case INS_LSR_ACC: {
-                C = (A & 0b1);
+                SF.C = (A & 0b1);
                 A = A >> 1;
                 UpdateZeroAndNegativeFlags(A);
             } break;
@@ -178,8 +192,8 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
             case INS_ROL_ACC: {
                 Byte old = A;
                 A = A << 1;
-                A |= C << 0;
-                C = (old & 0b10000000) > 0;
+                A |= SF.C << 0;
+                SF.C = (old & 0b10000000) > 0;
                 UpdateZeroAndNegativeFlags(A);
 
             } break;
@@ -447,6 +461,16 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
     }
 }
 
+void CPU::PushStatusFlagsToStack(unsigned int &nCycles, Mem &mem) {
+    PushByte(nCycles, PSF, mem);
+}
+
+void CPU::PopStatusFlagsFromStack(unsigned int &nCycles, Mem &mem) {
+    PSF = PopByte(nCycles, mem);
+    SF.B = 0;
+    SF.na = 0;
+}
+
 void CPU::debugReport() {
     // Registers
     std::cout << "PC: " << std::hex << unsigned(PC) << ", ";
@@ -455,18 +479,18 @@ void CPU::debugReport() {
     std::cout << "X: " << std::hex << unsigned(X) << ", ";
     std::cout << "Y: " << std::hex << unsigned(Y) << "\n";
     // Status flags
-    std::cout << "C: " << std::hex << unsigned(C) << ", ";
-    std::cout << "Z: " << std::hex << unsigned(Z) << ", ";
-    std::cout << "I: " << std::hex << unsigned(I) << ", ";
-    std::cout << "D: " << std::hex << unsigned(D) << ", ";
-    std::cout << "B: " << std::hex << unsigned(B) << ", ";
-    std::cout << "V: " << std::hex << unsigned(V) << ", ";
-    std::cout << "N: " << std::hex << unsigned(N) << "\n";
+    std::cout << "C: " << std::hex << unsigned(SF.C) << ", ";
+    std::cout << "Z: " << std::hex << unsigned(SF.Z) << ", ";
+    std::cout << "I: " << std::hex << unsigned(SF.I) << ", ";
+    std::cout << "D: " << std::hex << unsigned(SF.D) << ", ";
+    std::cout << "B: " << std::hex << unsigned(SF.B) << ", ";
+    std::cout << "V: " << std::hex << unsigned(SF.V) << ", ";
+    std::cout << "N: " << std::hex << unsigned(SF.N) << "\n";
 }
 
 void CPU::UpdateZeroAndNegativeFlags(Byte &reg) {
-    Z = (reg == 0);
-    N = (reg & 0b10000000) > 0;
+    SF.Z = (reg == 0);
+    SF.N = (reg & 0b10000000) > 0;
 }
 
 Byte CPU::FetchByte(unsigned int &nCycles, Mem &mem) {
@@ -530,8 +554,8 @@ void CPU::WriteRegister(Byte &reg, Byte value) {
 Word CPU::SPToAddr() { return SP + 0x100; }
 
 Byte CPU::PopByte(unsigned int &nCycles, Mem &mem) {
-    Byte value = ReadByte(nCycles, SPToAddr(), mem);
     SP++;
+    Byte value = ReadByte(nCycles, SPToAddr(), mem);
     nCycles--;
     return value;
 }
@@ -639,7 +663,7 @@ Word CPU::AddressingIndirectIndexed(unsigned int &nCycles, Mem &mem) {
 void CPU::Reset(Mem &mem) {
     PC = 0xFFFC;             // Initialize program counter to 0xFFC
     SP = 0xFF;            // Inititalize stack pointer to 0x01FF
-    C = Z = I = D = B = V = N = 0; // Reset status flags
+    SF.C = SF.Z = SF.I = SF.D = SF.B = SF.V = SF.N = 0; // Reset status flags
     A = X = Y = 0;          // Reset registers
     mem.Init();             // Reset memory
 }
