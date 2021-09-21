@@ -10,8 +10,7 @@
 
 /*
  * Not yet implemented instructions:
- *ADC BCC BCS BEQ BIT BMI BNE BPL BVC BVS CMP CPX CPY
- *SBC
+ *ADC CMP CPX CPY SBC
  */
 
 void CPU::Execute(unsigned int nCycles, Mem &mem) {
