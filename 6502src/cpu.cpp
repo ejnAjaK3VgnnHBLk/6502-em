@@ -7,12 +7,6 @@
  *RTS SBC SEC SED SEI STA STX STY TAX TAY TSX TXA TXS TYA
  */
 
-
-/*
- * Not yet implemented instructions:
- *ADC CMP CPX CPY SBC
- */
-
 void CPU::Execute(unsigned int nCycles, Mem &mem) {
     auto lAND = [&nCycles, &mem, this](Word addr) {
         A &= ReadByte(nCycles, addr, mem);
@@ -105,9 +99,185 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
         }
     };
 
+    auto Compare = [&nCycles, &mem, this](Byte &reg, Word addr) {
+        Byte val = ReadByte(nCycles, addr, mem);
+        SF.C = reg >= val;
+        SF.Z = (reg == val);
+        SF.N = ((reg - val) & 0b10000000) > 0;
+    };
+
+    auto ADC = [&nCycles, &mem, this](Word addr) {
+        Byte val = ReadByte(nCycles, addr, mem);
+        Byte origA = A;
+
+        Word sum = A + val + SF.C;
+        A = sum & 0xFF;
+        UpdateZeroAndNegativeFlags(A);
+        SF.C = sum > 0xFF;
+
+        // Most complicated flag to set
+        // First, check if sign bits are the same. We exclusive or both values to figure
+        //    out what bits have changed. Then AND it with the negative flag bit (0b10000000)
+        //    to figure out if that bit was *not* set, so invert it.
+        // Secondly, check if the sign bits have changed after the addition, and do the same as
+        //    above, except don't negate the bits.
+        // Lastly, and the two values as booleans, and set that to the value of V
+        SF.V = !((origA ^ val) & 0b10000000) && ((A ^ val) & 0b10000000);
+    };
+
+    auto SBC = [&nCycles, &mem, this] (Word addr) {
+        Byte val = ReadByte(nCycles, addr, mem);
+        Byte origA = A;
+
+        Word sum = A - val - SF.C;
+        A = sum & 0xFF;
+        UpdateZeroAndNegativeFlags(A);
+        SF.C = sum > 0xFF;
+
+        // Most complicated flag to set
+        // First, check if sign bits are the same. We exclusive or both values to figure
+        //    out what bits have changed. Then AND it with the negative flag bit (0b10000000)
+        //    to figure out if that bit was *not* set, so invert it.
+        // Secondly, check if the sign bits have changed after the addition, and do the same as
+        //    above, except don't negate the bits.
+        // Lastly, and the two values as booleans, and set that to the value of V
+        SF.V = !((origA ^ val) & 0b10000000) && ((A ^ val) & 0b10000000);
+    };
+
     while (nCycles > 0) {
         Byte instruction = FetchByte(nCycles, mem);
         switch (instruction) {
+            // Add and subtract
+            case INS_ADC_IM: {
+                Byte val = FetchByte(nCycles, mem);
+                Byte origA = A;
+
+                Word sum = A + val + SF.C;
+                A = sum & 0xFF;
+                UpdateZeroAndNegativeFlags(A);
+                SF.C = sum > 0xFF;
+
+                // Most complicated flag to set
+                // First, check if sign bits are the same. We exclusive or both values to figure
+                //    out what bits have changed. Then AND it with the negative flag bit (0b10000000)
+                //    to figure out if that bit was *not* set, so invert it.
+                // Secondly, check if the sign bits have changed after the addition, and do the same as
+                //    above, except don't negate the bits.
+                // Lastly, and the two values as booleans, and set that to the value of V
+                SF.V = !((origA ^ val) & 0b10000000) && ((A ^ val) & 0b10000000);
+            } break;
+            case INS_ADC_ZP:
+                ADC(AddressingZeroPage(nCycles, mem));
+            break;
+            case INS_ADC_ZPX:
+                ADC(AddressingZeroPageX(nCycles, mem));
+            break;
+            case INS_ADC_AB:
+                ADC(AddressingAbsolute(nCycles, mem));
+            break;
+            case INS_ADC_ABX:
+                ADC(AddressingAbsoluteX(nCycles, mem));
+            break;
+            case INS_ADC_ABY:
+                ADC(AddressingAbsoluteY(nCycles, mem));
+            break;
+            case INS_ADC_IDX:
+                ADC(AddressingIndexedIndirect(nCycles, mem));
+            break;
+            case INS_ADC_IDY:
+                ADC(AddressingIndirectIndexed(nCycles, mem));
+            break;
+            case INS_SBC_IM: {
+                Byte val = FetchByte(nCycles, mem);
+                Byte origA = A;
+
+                Word sum = A - val - SF.C;
+                A = sum & 0xFF;
+                UpdateZeroAndNegativeFlags(A);
+                SF.C = sum > 0xFF;
+
+                // Most complicated flag to set
+                // First, check if sign bits are the same. We exclusive or both values to figure
+                //    out what bits have changed. Then AND it with the negative flag bit (0b10000000)
+                //    to figure out if that bit was *not* set, so invert it.
+                // Secondly, check if the sign bits have changed after the addition, and do the same as
+                //    above, except don't negate the bits.
+                // Lastly, and the two values as booleans, and set that to the value of V
+                SF.V = !((origA ^ val) & 0b10000000) && ((A ^ val) & 0b10000000);
+            } break;
+            case INS_SBC_ZP:
+                SBC(AddressingZeroPage(nCycles, mem));
+            break;
+            case INS_SBC_ZPX:
+                SBC(AddressingZeroPageX(nCycles, mem));
+            break;
+            case INS_SBC_AB:
+                SBC(AddressingAbsolute(nCycles, mem));
+            break;
+            case INS_SBC_ABX:
+                SBC(AddressingAbsoluteX(nCycles, mem));
+            break;
+            case INS_SBC_ABY:
+                SBC(AddressingAbsoluteY(nCycles, mem));
+            break;
+            case INS_SBC_IDX:
+                SBC(AddressingIndexedIndirect(nCycles, mem));
+            break;
+            case INS_SBC_IDY:
+                SBC(AddressingIndirectIndexed(nCycles, mem));
+            break;
+            //Compare instructions
+            case INS_CPX_IM: {
+                Byte val = FetchByte(nCycles, mem);
+                SF.C = X >= val;
+                SF.Z = (X == val);
+                SF.N = ((X - val) & 0b10000000) > 0;
+            } break;
+            case INS_CPX_ZP:
+                Compare(X, AddressingZeroPage(nCycles, mem));
+            break;
+            case INS_CPX_AB:
+                Compare(X, AddressingAbsolute(nCycles, mem));
+            break;
+            case INS_CPY_IM: {
+                Byte val = FetchByte(nCycles, mem);
+                SF.C = Y >= val;
+                SF.Z = (Y == val);
+                SF.N = ((Y - val) & 0b10000000) > 0;
+            } break;
+            case INS_CPY_ZP:
+                Compare(Y, AddressingZeroPage(nCycles, mem));
+            break;
+            case INS_CPY_AB:
+                Compare(Y, AddressingAbsolute(nCycles, mem));
+            break;
+            case INS_CMP_IM: {
+                Byte val = FetchByte(nCycles, mem);
+                SF.C = A >= val;
+                SF.Z = (A == val);
+                SF.N = ((A - val) & 0b10000000) > 0;
+            } break;
+            case INS_CMP_ZP:
+                Compare(A, AddressingZeroPage(nCycles, mem));
+            break;
+            case INS_CMP_ZPX:
+                Compare(A, AddressingZeroPageX(nCycles, mem));
+            break;
+            case INS_CMP_AB:
+                Compare(A, AddressingAbsolute(nCycles, mem));
+            break;
+            case INS_CMP_ABX:
+                Compare(A, AddressingAbsoluteX(nCycles, mem));
+            break;
+            case INS_CMP_ABY:
+                Compare(A, AddressingAbsoluteY(nCycles, mem));
+            break;
+            case INS_CMP_IDX:
+                Compare(A, AddressingIndexedIndirect(nCycles, mem));
+            break;
+            case INS_CMP_IDY:
+                Compare(A, AddressingIndirectIndexed(nCycles, mem));
+            break;
             // Branch Functions
             case INS_BCC: {
                 Branch(SF.C, false);
