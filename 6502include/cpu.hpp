@@ -156,6 +156,15 @@ struct CPU {
         INS_ADC_IDX = 0x61,
         INS_ADC_IDY = 0x71,
 
+        INS_SBC_IM = 0xE9,
+        INS_SBC_ZP = 0xE5,
+        INS_SBC_ZPX = 0xF5,
+        INS_SBC_AB = 0xED,
+        INS_SBC_ABX = 0xFD,
+        INS_SBC_ABY = 0xF9,
+        INS_SBC_IDX = 0xE1,
+        INS_SBC_IDY = 0xF1,
+
         INS_TAX = 0xAA,
         INS_TAY = 0xA8,
         INS_TSX = 0xBA,
@@ -258,6 +267,23 @@ struct CPU {
         INS_BPL = 0x10,
         INS_BVC = 0x50,
         INS_BVS = 0x70,
+
+        INS_CMP_IM = 0xC9,
+        INS_CMP_ZP = 0xC5,
+        INS_CMP_ZPX = 0xD5,
+        INS_CMP_AB = 0xCD,
+        INS_CMP_ABX = 0xDD,
+        INS_CMP_ABY = 0xD9,
+        INS_CMP_IDX = 0xC1,
+        INS_CMP_IDY = 0xD1,
+
+        INS_CPX_IM = 0xE0,
+        INS_CPX_ZP = 0xE4,
+        INS_CPX_AB = 0xEC,
+
+        INS_CPY_IM = 0xC0,
+        INS_CPY_ZP = 0xC4,
+        INS_CPY_AB = 0xCC,
 
         INS_JMP_AB = 0x4C,
         INS_JMP_ID = 0x6C
