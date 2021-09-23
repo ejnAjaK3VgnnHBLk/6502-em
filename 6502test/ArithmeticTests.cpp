@@ -1,10 +1,10 @@
 #include "gtest/gtest.h"
-#include "cpu.hpp"
+#include "cpu_6502.hpp"
 
 class ArithmeticTests : public ::testing::Test {
     public:
-        CPU cpu;
-        Mem mem;
+        cpu_6502::CPU cpu;
+        cpu_6502::Mem mem;
         unsigned int nCycles = 50;
 
     void SetUp() override {

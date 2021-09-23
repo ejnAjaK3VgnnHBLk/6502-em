@@ -1,10 +1,10 @@
 #include "gtest/gtest.h"
-#include "cpu.hpp"
+#include "cpu_6502.hpp"
 
 class IncrementDecrementTests : public ::testing::Test {
     public:
-        CPU cpu;
-       Mem mem;
+        cpu_6502::CPU cpu;
+        cpu_6502::Mem mem;
 
     void SetUp() override {
         // Called immediately after the constructor

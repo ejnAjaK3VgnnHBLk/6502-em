@@ -1,4 +1,4 @@
-#include "cpu.hpp"
+#include "cpu_6502.hpp"
 
 /*
  *ADC AND ASL BCC BCS BEQ BIT BMI BNE BPL BRK BVC BVS CLC
@@ -7,53 +7,53 @@
  *RTS SBC SEC SED SEI STA STX STY TAX TAY TSX TXA TXS TYA
  */
 
-void CPU::Execute(unsigned int nCycles, Mem &mem) {
-    auto lAND = [&nCycles, &mem, this](Word addr) {
+void cpu_6502::CPU::Execute(unsigned int nCycles, cpu_6502::Mem &mem) {
+    auto lAND = [&nCycles, &mem, this](cpu_6502::Word addr) {
         A &= ReadByte(nCycles, addr, mem);
         UpdateZeroAndNegativeFlags(A);
     };
 
-    auto EOR = [&nCycles, &mem, this](Word addr) {
+    auto EOR = [&nCycles, &mem, this](cpu_6502::Word addr) {
         A ^= ReadByte(nCycles, addr, mem);
         UpdateZeroAndNegativeFlags(A);
     };
 
-    auto ORA = [&nCycles, &mem, this](Word addr) {
+    auto ORA = [&nCycles, &mem, this](cpu_6502::Word addr) {
         A |= ReadByte(nCycles, addr, mem);
         UpdateZeroAndNegativeFlags(A);
     };
 
-    auto BIT = [&nCycles, &mem, this](Word addr) {
-        Byte val = ReadByte(nCycles, addr, mem);
+    auto BIT = [&nCycles, &mem, this](cpu_6502::Word addr) {
+        cpu_6502::Byte val = ReadByte(nCycles, addr, mem);
         SF.V = (val & 0b1000000) > 0;
         SF.N = (val & 0b10000000) > 0;
         SF.Z = (A & val) == 0;
     };
 
-    auto IncrementMem = [&nCycles, &mem, this](Word addr) {
-        Byte xd = ReadByte(nCycles, addr, mem);
+    auto IncrementMem = [&nCycles, &mem, this](cpu_6502::Word addr) {
+        cpu_6502::Byte xd = ReadByte(nCycles, addr, mem);
         WriteByte(++xd, addr, nCycles, mem);
         UpdateZeroAndNegativeFlags(mem[addr]);
     };
 
-    auto IncrementReg = [&nCycles, &mem, this](Byte &reg) {
+    auto IncrementReg = [&nCycles, &mem, this](cpu_6502::Byte &reg) {
         reg += 1;
         UpdateZeroAndNegativeFlags(reg);
     };
 
-    auto DecrementMem = [&nCycles, &mem, this](Word addr) {
-        Byte xd = ReadByte(nCycles, addr, mem);
+    auto DecrementMem = [&nCycles, &mem, this](cpu_6502::Word addr) {
+        cpu_6502::Byte xd = ReadByte(nCycles, addr, mem);
         WriteByte(--xd, addr, nCycles, mem);
         UpdateZeroAndNegativeFlags(mem[addr]);
     };
 
-    auto DecrementReg = [&nCycles, &mem, this](Byte &reg) {
+    auto DecrementReg = [&nCycles, &mem, this](cpu_6502::Byte &reg) {
         reg -= 1;
         UpdateZeroAndNegativeFlags(reg);
     };
 
-    auto ASL = [&nCycles, &mem, this](Word addr) {
-        Byte val = ReadByte(nCycles, addr, mem);
+    auto ASL = [&nCycles, &mem, this](cpu_6502::Word addr) {
+        cpu_6502::Byte val = ReadByte(nCycles, addr, mem);
         SF.C = (val & 0b10000000) > 0;
         SF.Z = (val == 0);
         WriteByte(val << 1, addr, nCycles, mem);
@@ -61,25 +61,25 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
         UpdateZeroAndNegativeFlags(mem[addr]);
     };
 
-    auto LSR = [&nCycles, &mem, this](Word addr) {
+    auto LSR = [&nCycles, &mem, this](cpu_6502::Word addr) {
         SF.C = (mem[addr] & 0b1);
         WriteByte(mem[addr] >> 1, addr, nCycles, mem);
         UpdateZeroAndNegativeFlags(mem[addr]);
     };
 
-    auto ROL = [&nCycles, &mem, this](Word addr) {
-        Byte old = ReadByte(nCycles, addr, mem);
+    auto ROL = [&nCycles, &mem, this](cpu_6502::Word addr) {
+        cpu_6502::Byte old = ReadByte(nCycles, addr, mem);
         WriteByte(mem[addr] << 1, addr, nCycles, mem);
-        Byte val = ReadByte(nCycles, addr, mem) | SF.C << 0;
+        cpu_6502::Byte val = ReadByte(nCycles, addr, mem) | SF.C << 0;
         WriteByte(val, addr, nCycles, mem);
         SF.C = (old & 0b10000000) > 0;
         UpdateZeroAndNegativeFlags(mem[addr]);
     };
 
-    auto ROR = [&nCycles, &mem, this](Word addr) {
-        Byte old = ReadByte(nCycles, addr, mem);
+    auto ROR = [&nCycles, &mem, this](cpu_6502::Word addr) {
+        cpu_6502::Byte old = ReadByte(nCycles, addr, mem);
         WriteByte(mem[addr] >> 1, addr, nCycles, mem); // Right shift everything
-        Byte asdf = ReadByte(nCycles, addr, mem) ;
+        cpu_6502::Byte asdf = ReadByte(nCycles, addr, mem) ;
         asdf |= asdf << 7;
         WriteByte(asdf, addr, nCycles, mem);
         SF.C = (old & 0b1);
@@ -87,9 +87,9 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
     };
 
     auto Branch = [&nCycles, &mem, this](bool test, bool val) {
-        Byte displacement = FetchByte(nCycles, mem);
+        cpu_6502::Byte displacement = FetchByte(nCycles, mem);
         if (test == val) {
-            Word oldPC = PC;
+            cpu_6502::Word oldPC = PC;
 
             PC+=displacement;
             nCycles--;
@@ -99,18 +99,18 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
         }
     };
 
-    auto Compare = [&nCycles, &mem, this](Byte &reg, Word addr) {
-        Byte val = ReadByte(nCycles, addr, mem);
+    auto Compare = [&nCycles, &mem, this](cpu_6502::Byte &reg, cpu_6502::Word addr) {
+        cpu_6502::Byte val = ReadByte(nCycles, addr, mem);
         SF.C = reg >= val;
         SF.Z = (reg == val);
         SF.N = ((reg - val) & 0b10000000) > 0;
     };
 
-    auto ADC = [&nCycles, &mem, this](Word addr) {
-        Byte val = ReadByte(nCycles, addr, mem);
-        Byte origA = A;
+    auto ADC = [&nCycles, &mem, this](cpu_6502::Word addr) {
+        cpu_6502::Byte val = ReadByte(nCycles, addr, mem);
+        cpu_6502::Byte origA = A;
 
-        Word sum = A + val + SF.C;
+        cpu_6502::Word sum = A + val + SF.C;
         A = sum & 0xFF;
         UpdateZeroAndNegativeFlags(A);
         SF.C = sum > 0xFF;
@@ -125,11 +125,11 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
         SF.V = !((origA ^ val) & 0b10000000) && ((A ^ val) & 0b10000000);
     };
 
-    auto SBC = [&nCycles, &mem, this] (Word addr) {
-        Byte val = ReadByte(nCycles, addr, mem);
-        Byte origA = A;
+    auto SBC = [&nCycles, &mem, this] (cpu_6502::Word addr) {
+        cpu_6502::Byte val = ReadByte(nCycles, addr, mem);
+        cpu_6502::Byte origA = A;
 
-        Word sum = A - val - SF.C;
+        cpu_6502::Word sum = A - val - SF.C;
         A = sum & 0xFF;
         UpdateZeroAndNegativeFlags(A);
         SF.C = sum > 0xFF;
@@ -145,14 +145,14 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
     };
 
     while (nCycles > 0) {
-        Byte instruction = FetchByte(nCycles, mem);
+        cpu_6502::Byte instruction = FetchByte(nCycles, mem);
         switch (instruction) {
             // Add and subtract
             case INS_ADC_IM: {
-                Byte val = FetchByte(nCycles, mem);
-                Byte origA = A;
+                cpu_6502::Byte val = FetchByte(nCycles, mem);
+                cpu_6502::Byte origA = A;
 
-                Word sum = A + val + SF.C;
+                cpu_6502::Word sum = A + val + SF.C;
                 A = sum & 0xFF;
                 UpdateZeroAndNegativeFlags(A);
                 SF.C = sum > 0xFF;
@@ -188,10 +188,10 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
                 ADC(AddressingIndirectIndexed(nCycles, mem));
             break;
             case INS_SBC_IM: {
-                Byte val = FetchByte(nCycles, mem);
-                Byte origA = A;
+                cpu_6502::Byte val = FetchByte(nCycles, mem);
+                cpu_6502::Byte origA = A;
 
-                Word sum = A - val - SF.C;
+                cpu_6502::Word sum = A - val - SF.C;
                 A = sum & 0xFF;
                 UpdateZeroAndNegativeFlags(A);
                 SF.C = sum > 0xFF;
@@ -228,7 +228,7 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
             break;
             //Compare instructions
             case INS_CPX_IM: {
-                Byte val = FetchByte(nCycles, mem);
+                cpu_6502::Byte val = FetchByte(nCycles, mem);
                 SF.C = X >= val;
                 SF.Z = (X == val);
                 SF.N = ((X - val) & 0b10000000) > 0;
@@ -240,7 +240,7 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
                 Compare(X, AddressingAbsolute(nCycles, mem));
             break;
             case INS_CPY_IM: {
-                Byte val = FetchByte(nCycles, mem);
+                cpu_6502::Byte val = FetchByte(nCycles, mem);
                 SF.C = Y >= val;
                 SF.Z = (Y == val);
                 SF.N = ((Y - val) & 0b10000000) > 0;
@@ -252,7 +252,7 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
                 Compare(Y, AddressingAbsolute(nCycles, mem));
             break;
             case INS_CMP_IM: {
-                Byte val = FetchByte(nCycles, mem);
+                cpu_6502::Byte val = FetchByte(nCycles, mem);
                 SF.C = A >= val;
                 SF.Z = (A == val);
                 SF.N = ((A - val) & 0b10000000) > 0;
@@ -343,7 +343,7 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
             break;
             // Rotate Right ---------------------------------------------
             case INS_ROR_ACC: {
-                Byte old = A;
+                cpu_6502::Byte old = A;
                 A = A >> 1; // Right shift everything
                 A |= SF.C << 7; // Set 7th bit to C
                 SF.C = (old & 0b1); // First bit of old is new C
@@ -399,7 +399,7 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
             break;
             // Rotate left ---------------------------------------------
             case INS_ROL_ACC: {
-                Byte old = A;
+                cpu_6502::Byte old = A;
                 A = A << 1;
                 A |= SF.C << 0;
                 SF.C = (old & 0b10000000) > 0;
@@ -615,7 +615,7 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
                 WriteRegister(X, ReadByte(nCycles, AddressingAbsolute(nCycles, mem), mem));
             break;
             case INS_LDX_ABY:
-                WriteRegister(X, ReadByte(nCycles, AddressingAbsoluteY(nCycles, mem), mem)); 
+                WriteRegister(X, ReadByte(nCycles, AddressingAbsoluteY(nCycles, mem), mem));
             break;
             // LDY instruction ----------------------------------------------------------------
             case INS_LDY_IM:
@@ -657,7 +657,7 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
             break;
             // STX instruction ------------------------------------------------------------------
             case INS_STX_ZP:
-                WriteToMemFromRegister(X, FetchByte(nCycles, mem), nCycles, mem);  
+                WriteToMemFromRegister(X, FetchByte(nCycles, mem), nCycles, mem);
             break;
             case INS_STX_ZPY:
                 WriteToMemFromRegister(X, AddressingZeroPageY(nCycles, mem), nCycles, mem);
@@ -677,14 +677,14 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
             break;
             // JSR instruction ------------------------------------------------------------------
             case INS_JSR: {
-                Word target = FetchWord(nCycles, mem);
-                Word pcMinusOne = PC - 1;
+                cpu_6502::Word target = FetchWord(nCycles, mem);
+                cpu_6502::Word pcMinusOne = PC - 1;
                 PushWord(nCycles, pcMinusOne, mem);
                 PC = target;
             } break;
             case INS_RTS: {
                 // It pulls the program counter (minus one) from the stack.
-                Word PCPlusOne = PopWord(nCycles, mem) + 1;
+                cpu_6502::Word PCPlusOne = PopWord(nCycles, mem) + 1;
                 PC = PCPlusOne;
                 nCycles -= 2;
             } break;
@@ -700,15 +700,15 @@ void CPU::Execute(unsigned int nCycles, Mem &mem) {
     }
 }
 
-void CPU::PushStatusFlagsToStack(unsigned int &nCycles, Mem &mem) {
+void cpu_6502::CPU::PushStatusFlagsToStack(unsigned int &nCycles, cpu_6502::Mem &mem) {
     PushByte(nCycles, PSF, mem);
 }
 
-void CPU::PopStatusFlagsFromStack(unsigned int &nCycles, Mem &mem) {
+void cpu_6502::CPU::PopStatusFlagsFromStack(unsigned int &nCycles, cpu_6502::Mem &mem) {
     PSF = PopByte(nCycles, mem);
 }
 
-void CPU::debugReport() {
+void cpu_6502::CPU::debugReport() {
     // Registers
     std::cout << "PC: " << std::hex << unsigned(PC) << ", ";
     std::cout << "SP: " << std::hex << unsigned(SP) << ", ";
@@ -725,28 +725,28 @@ void CPU::debugReport() {
     std::cout << "N: " << std::hex << unsigned(SF.N) << "\n";
 }
 
-void CPU::UpdateZeroAndNegativeFlags(Byte &reg) {
+void cpu_6502::CPU::UpdateZeroAndNegativeFlags(cpu_6502::Byte &reg) {
     SF.Z = (reg == 0);
     SF.N = (reg & 0b10000000) > 0;
 }
 
-Byte CPU::FetchByte(unsigned int &nCycles, Mem &mem) {
-    Byte ins = mem[PC];
+cpu_6502::Byte cpu_6502::CPU::FetchByte(unsigned int &nCycles, cpu_6502::Mem &mem) {
+    cpu_6502::Byte ins = mem[PC];
     PC++;
     nCycles--;
     return ins;
 }
 
-Byte CPU::ReadByte(unsigned int &nCycles, Word addr, Mem &mem) {
-    Byte ins = mem[addr];
+cpu_6502::Byte cpu_6502::CPU::ReadByte(unsigned int &nCycles, cpu_6502::Word addr, cpu_6502::Mem &mem) {
+    cpu_6502::Byte ins = mem[addr];
     nCycles--;
     return ins;
 }
 
-Word CPU::FetchWord(unsigned int &nCycles, Mem &mem) {
+cpu_6502::Word cpu_6502::CPU::FetchWord(unsigned int &nCycles, cpu_6502::Mem &mem) {
     // Remember the 6502 is LITTLE ENDIAN, MEANING THE LEAST SIGNIFICANT
     // BIT COMES FIRST.
-    Word Data = mem[PC];
+    cpu_6502::Word Data = mem[PC];
     PC++;
 
     Data |= (mem[PC] << 8);
@@ -756,10 +756,10 @@ Word CPU::FetchWord(unsigned int &nCycles, Mem &mem) {
     return Data;
 }
 
-Word CPU::ReadWord(unsigned int &nCycles, Word addr, Mem &mem) {
+cpu_6502::Word cpu_6502::CPU::ReadWord(unsigned int &nCycles, cpu_6502::Word addr, cpu_6502::Mem &mem) {
     // Remember the 6502 is LITTLE ENDIAN, MEANING THE LEAST SIGNIFICANT
     // BIT COMES FIRST.
-    Word Data = mem[addr];
+    cpu_6502::Word Data = mem[addr];
     addr++;
     Data |= (mem[addr] << 8);
     nCycles-=2;
@@ -767,38 +767,38 @@ Word CPU::ReadWord(unsigned int &nCycles, Word addr, Mem &mem) {
     return Data;
 }
 
-void CPU::WriteWord(Word dta, unsigned int addr, unsigned int &cycles, Mem &mem) {
+void cpu_6502::CPU::WriteWord(cpu_6502::Word dta, unsigned int addr, unsigned int &cycles, cpu_6502::Mem &mem) {
     mem[addr] = dta & 0xFF;
     mem[addr+1] = (dta >> 8);
     cycles -= 2;
 }
 
-void CPU::WriteByte(Byte data, unsigned int addr, unsigned int &nCycles, Mem &mem) {
+void cpu_6502::CPU::WriteByte(cpu_6502::Byte data, unsigned int addr, unsigned int &nCycles, cpu_6502::Mem &mem) {
     mem[addr] = data;
     nCycles--;
 }
 
-void CPU::WriteToMemFromRegister(Byte &reg, Word addr, unsigned int& nCycles, Mem &mem) {
+void cpu_6502::CPU::WriteToMemFromRegister(cpu_6502::Byte &reg, cpu_6502::Word addr, unsigned int& nCycles, cpu_6502::Mem &mem) {
     mem[addr] = reg;
     nCycles--;
 }
 
-void CPU::WriteRegister(Byte &reg, Byte value) {
+void cpu_6502::CPU::WriteRegister(cpu_6502::Byte &reg, cpu_6502::Byte value) {
     reg = value;
     UpdateZeroAndNegativeFlags(reg);
 }
 
-Word CPU::SPToAddr() { return SP + 0x100; }
+cpu_6502::Word cpu_6502::CPU::SPToAddr() { return SP + 0x100; }
 
-Byte CPU::PopByte(unsigned int &nCycles, Mem &mem) {
+cpu_6502::Byte cpu_6502::CPU::PopByte(unsigned int &nCycles, cpu_6502::Mem &mem) {
     SP++;
-    Byte value = ReadByte(nCycles, SPToAddr(), mem);
+    cpu_6502::Byte value = ReadByte(nCycles, SPToAddr(), mem);
     nCycles--;
     return value;
 }
 
-Word CPU::PopWord(unsigned int &nCycles, Mem &mem) {
-    Word value = mem[SPToAddr()+1];
+cpu_6502::Word cpu_6502::CPU::PopWord(unsigned int &nCycles, cpu_6502::Mem &mem) {
+    cpu_6502::Word value = mem[SPToAddr()+1];
     SP++;
     value |= (mem[SPToAddr()+1] << 8);
     nCycles-=2;
@@ -808,13 +808,13 @@ Word CPU::PopWord(unsigned int &nCycles, Mem &mem) {
     return value;
 }
 
-void CPU::PushByte(unsigned int &nCycles, Byte value, Mem &mem) {
+void cpu_6502::CPU::PushByte(unsigned int &nCycles, cpu_6502::Byte value, cpu_6502::Mem &mem) {
     mem[SPToAddr()] = value;
     SP--;
     nCycles--;
 }
 
-void CPU::PushWord(unsigned int &nCycles, Word value, Mem &mem) {
+void cpu_6502::CPU::PushWord(unsigned int &nCycles, cpu_6502::Word value, cpu_6502::Mem &mem) {
     mem[SPToAddr()] = value >> 8;
     SP--;
     mem[SPToAddr()] = value & 0xFF;
@@ -825,79 +825,79 @@ void CPU::PushWord(unsigned int &nCycles, Word value, Mem &mem) {
 // Addressing Mode Functions
 // See (https://github.com/ejnAjaK3VgnnHBLk/6502-em/pull/20#issue-988360270) for why I don't implement
 //      some addressing modes here!
-Byte CPU::AddressingZeroPage(unsigned int &nCycles, Mem &mem) {
+cpu_6502::Byte cpu_6502::CPU::AddressingZeroPage(unsigned int &nCycles, cpu_6502::Mem &mem) {
     // zero page addressing mode has only an 8 bit address operand
     return FetchByte(nCycles, mem);
 }
 
-Byte CPU::AddressingZeroPageX(unsigned int &nCycles, Mem &mem) {
+cpu_6502::Byte cpu_6502::CPU::AddressingZeroPageX(unsigned int &nCycles, cpu_6502::Mem &mem) {
     // taking the 8 bit zero page address from the instruction and adding the current value of 
     // the X register to it
-    Byte zpAddress = FetchByte(nCycles, mem);
+    cpu_6502::Byte zpAddress = FetchByte(nCycles, mem);
     zpAddress += X;
     nCycles--; 
     if(zpAddress >= 0xFF) { zpAddress -= 0x100; nCycles--; } 
     return zpAddress;
 }
 
-Byte CPU::AddressingZeroPageY(unsigned int &nCycles, Mem &mem) {
+cpu_6502::Byte cpu_6502::CPU::AddressingZeroPageY(unsigned int &nCycles, cpu_6502::Mem &mem) {
     // taking the 8 bit zero page address from the instruction and adding the current value of 
     // the Y register to it
-    Byte zpAddress = FetchByte(nCycles, mem);
+    cpu_6502::Byte zpAddress = FetchByte(nCycles, mem);
     zpAddress += Y; 
     nCycles--; 
     if(zpAddress >= 0xFF) { zpAddress -= 0x100; nCycles--; } 
     return zpAddress;
 }
 
-Word CPU::AddressingAbsolute(unsigned int &nCycles, Mem &mem) {
+cpu_6502::Word cpu_6502::CPU::AddressingAbsolute(unsigned int &nCycles, cpu_6502::Mem &mem) {
     // contain a full 16 bit address to identify the target location
     return FetchWord(nCycles, mem);
 }
 
-Word CPU::AddressingAbsoluteX(unsigned int &nCycles, Mem &mem) {
+cpu_6502::Word cpu_6502::CPU::AddressingAbsoluteX(unsigned int &nCycles, cpu_6502::Mem &mem) {
     // taking the 16 bit address from the instruction and added the contents of the X register
-    Word addr = FetchWord(nCycles, mem);
+    cpu_6502::Word addr = FetchWord(nCycles, mem);
     addr += X; // Add X register to the fetched address
     nCycles--; // Addition takes one cycle
     return addr;
 }
 
-Word CPU::AddressingAbsoluteY(unsigned int &nCycles, Mem &mem) {
+cpu_6502::Word cpu_6502::CPU::AddressingAbsoluteY(unsigned int &nCycles, cpu_6502::Mem &mem) {
     // same as the previous mode only with the contents of the Y register
-    Word addr = FetchWord(nCycles, mem);
+    cpu_6502::Word addr = FetchWord(nCycles, mem);
     addr += Y; // Add X register to the fetched address
     nCycles--; // Addition takes one cycle
     return addr;
 }
 
-Word CPU::AddressingIndirect(unsigned int &nCycles, Mem &mem) {
+cpu_6502::Word cpu_6502::CPU::AddressingIndirect(unsigned int &nCycles, cpu_6502::Mem &mem) {
     // The instruction contains a 16 bit address which identifies the location of the least 
     //significant byte of another 16 bit memory address which is the real target of the instruction
-    Word addr = FetchWord(nCycles, mem);
+    cpu_6502::Word addr = FetchWord(nCycles, mem);
     return ReadWord(nCycles, addr, mem);
 
 }
 
-Word CPU::AddressingIndexedIndirect(unsigned int &nCycles, Mem &mem) {
+cpu_6502::Word cpu_6502::CPU::AddressingIndexedIndirect(unsigned int &nCycles, cpu_6502::Mem &mem) {
     // The address of the table is taken from the instruction and the X register added to it (with 
     // zero page wrap around) to give the location of the least significant byte of the target address.
-    Byte addr = FetchByte(nCycles, mem);
+    cpu_6502::Byte addr = FetchByte(nCycles, mem);
     addr += X;
     nCycles--;
     return ReadWord(nCycles, addr, mem);
 }
 
-Word CPU::AddressingIndirectIndexed(unsigned int &nCycles, Mem &mem) {
+cpu_6502::Word cpu_6502::CPU::AddressingIndirectIndexed(unsigned int &nCycles, cpu_6502::Mem &mem) {
     // In instruction contains the zero page location of the least significant byte of 16 bit address. 
     // The Y register is dynamically added to this value to generated the actual target address for operation.
-    Byte addr = FetchByte(nCycles, mem);
+    cpu_6502::Byte addr = FetchByte(nCycles, mem);
     addr += Y;
     nCycles--;
     return ReadWord(nCycles, addr, mem);
 }   
 
-void CPU::Reset(Mem &mem) {
+void cpu_6502::CPU::Reset(cpu_6502::Mem &mem) {
     PC = 0xFFFC;             // Initialize program counter to 0xFFC
     SP = 0xFF;            // Inititalize stack pointer to 0x01FF
     SF.C = SF.Z = SF.I = SF.D = SF.B = SF.V = SF.N = 0; // Reset status flags
@@ -905,7 +905,7 @@ void CPU::Reset(Mem &mem) {
     mem.Init();             // Reset memory
 }
 
-void CPU::TransferRegister(Byte &src, Byte &dest) {
+void cpu_6502::CPU::TransferRegister(cpu_6502::Byte &src, cpu_6502::Byte &dest) {
     dest = src;
     UpdateZeroAndNegativeFlags(dest);
 }

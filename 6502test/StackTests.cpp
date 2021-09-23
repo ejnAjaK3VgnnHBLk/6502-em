@@ -1,10 +1,10 @@
 #include "gtest/gtest.h"
-#include "cpu.hpp"
+#include "cpu_6502.hpp"
 
 class StackTests : public ::testing::Test {
     public:
-        CPU cpu;
-        Mem mem;
+        cpu_6502::CPU cpu;
+        cpu_6502::Mem mem;
         unsigned int nCycles = 50;
 
     void SetUp() override {
@@ -23,8 +23,8 @@ TEST_F(StackTests, PopByteTest) {
     mem[0x100] = 0x14;
     mem[0x101] = 0x21;
 
-    Byte test1 = cpu.PopByte(nCycles, mem);
-    Byte test2 = cpu.PopByte(nCycles, mem);
+    cpu_6502::Byte test1 = cpu.PopByte(nCycles, mem);
+    cpu_6502::Byte test2 = cpu.PopByte(nCycles, mem);
 
     EXPECT_EQ(test1, 0x14);
     EXPECT_EQ(test2, 0x21);
