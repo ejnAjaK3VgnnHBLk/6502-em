@@ -232,3 +232,15 @@ TEST_F(CPUFunctionTests, PushPopStatusFlagsOnStack) {
     EXPECT_EQ(cpu.SF.Z, 1);
     EXPECT_EQ(cpu.SF.C, 0);
 }
+
+TEST_F(CPUFunctionTests, MemReadDataFromFileTest) {
+    std::string filepath = "/home/n1le/6502-em/test.bin";
+    mem.LoadMem(filepath);
+    cpu.Execute(2, mem);
+    EXPECT_TRUE(cpu.SF.C);
+    cpu.Execute(2, mem);
+    EXPECT_FALSE(cpu.SF.C);
+    EXPECT_EQ(mem[0xFFFC], 0x00);
+    EXPECT_EQ(mem[0xFFFD], 0x00);
+    EXPECT_EQ(mem[0xFFCC], 0xea);
+}
