@@ -2,103 +2,135 @@
 #define __CPU_HPP__
 
 #include <iostream>
-#include "mem.hpp"
+#include <cassert>
+#include <cstdint>
+#include <iostream>
 
-struct StatusFlags {
+namespace cpu_6502 {
+    using Byte = uint8_t;
+    using Word = uint16_t;
+
+    struct Mem;
+    struct CPU;
+    struct StatusFlags;
+}
+
+const static unsigned int MAX_MEM = 1024 * 64;
+
+struct cpu_6502::Mem {
+    Byte Data[MAX_MEM];
+
+    void Init();
+    void LoadMem(std::string filename);
+
+    // Read one byte
+    Byte operator[] (unsigned int address)  const {
+        assert (address <= MAX_MEM);
+        return Data[address];
+    }
+
+    // Write one byte
+    Byte& operator[] (unsigned int address) {
+        assert (address <= MAX_MEM);
+        return Data[address];
+    }
+};
+
+struct cpu_6502::StatusFlags {
     // Processor status flags: only 1 bit long and are technically supposed to
     // be in a single byte. In order these flags are: the carry flag, the zero
     // flag, the interrupt disable flag, the decimal mode flag, the break command
     // flag, the overflow flag, and the negative flag.
-    Byte C : 1;
-    Byte Z : 1;
-    Byte I : 1;
-    Byte D : 1;
-    Byte B : 1;
-    Byte na : 1; // Not used bit
-    Byte V : 1;
-    Byte N : 1;
+    cpu_6502::Byte C : 1;
+    cpu_6502::Byte Z : 1;
+    cpu_6502::Byte I : 1;
+    cpu_6502::Byte D : 1;
+    cpu_6502::Byte B : 1;
+    cpu_6502::Byte na : 1; // Not used bit
+    cpu_6502::Byte V : 1;
+    cpu_6502::Byte N : 1;
 };
 
-struct CPU {
-    Word PC;    // Program counter - 16 bit register that points to next
+struct cpu_6502::CPU {
+    cpu_6502::Word PC;    // Program counter - 16 bit register that points to next
                 // address on the stack to be executed.
     
-    Byte SP;    // Stack pointer - 8 bit register that points to next
+    cpu_6502::Byte SP;    // Stack pointer - 8 bit register that points to next
                 // free location on the stack.
 
-    Byte A;     // Accululator - 8 bit register used for all arithmetic
+    cpu_6502::Byte A;     // Accululator - 8 bit register used for all arithmetic
                 // and logic operations.
 
-    Byte X;     // Index Register X - 8 bit register for offsets or counters
+   cpu_6502::Byte X;     // Index Register X - 8 bit register for offsets or counters
                 // for accessing memory.
 
-    Byte Y;     // Index Reigster Y - 8 bit register for counter or offset
+    cpu_6502::Byte Y;     // Index Reigster Y - 8 bit register for counter or offset
                 // memory addresses
 
     union {
-        Byte PSF;
+        cpu_6502::Byte PSF;
         struct StatusFlags SF;
     };
 
     // Read byte from memory, increment program counter and decrement nCycles
-    Byte FetchByte(unsigned int &nCycles, Mem &mem);
+    cpu_6502::Byte FetchByte(unsigned int &nCycles, cpu_6502::Mem &mem);
 
-    // Same thing as FetchByte but don't increment program counter
-    Byte ReadByte(unsigned int &nCycles, Word addr, Mem &mem);
+    // Same thing as Fetchcpu_6502::Byte but don't increment program counter
+    cpu_6502::Byte ReadByte(unsigned int &nCycles, cpu_6502::Word addr, cpu_6502::Mem &mem);
 
     // Fetch word from memory, increment program counter and decrement cycles
-    Word FetchWord(unsigned int &nCycles, Mem &mem);
+    cpu_6502::Word FetchWord(unsigned int &nCycles, cpu_6502::Mem &mem);
 
     // Same thing as FetchWord but don't increment program counter
-    Word ReadWord(unsigned int &nCycles, Word addr, Mem &mem);
+    cpu_6502::Word ReadWord(unsigned int &nCycles, cpu_6502::Word addr, cpu_6502::Mem &mem);
 
     // Write word and byte
-    void WriteWord(Word dta, unsigned int addr, unsigned int &cycles, Mem &mem);
-    void WriteByte(Byte data, unsigned int addr, unsigned int &nCycles, Mem &mem);
+    void WriteWord(cpu_6502::Word dta, unsigned int addr, unsigned int &cycles, cpu_6502::Mem &mem);
+    void WriteByte(cpu_6502::Byte data, unsigned int addr, unsigned int &nCycles, cpu_6502::Mem &mem);
 
     // Write register to memory
-    void WriteToMemFromRegister(Byte &reg, Word addr, unsigned int& nCycles, Mem &mem);
+    void WriteToMemFromRegister(cpu_6502::Byte &reg, cpu_6502::Word addr, unsigned int& nCycles, cpu_6502::Mem &mem);
 
     // Write to register using value
-    void WriteRegister(Byte &reg, Byte value);
+    void WriteRegister(cpu_6502::Byte &reg, cpu_6502::Byte value);
 
     // Execute instruction based on PC location
-    void Execute(unsigned int nCycles, Mem &mem);
+    void Execute(unsigned int nCycles, cpu_6502::Mem &mem);
 
     // Reset everything to default status
-    void Reset(Mem &mem);
+    void Reset(cpu_6502::Mem &mem);
 
     // Debugging function
     void debugReport();
 
     // Status flag update after function call (where necessary)
-    void UpdateZeroAndNegativeFlags(Byte &reg);
+    void UpdateZeroAndNegativeFlags(cpu_6502::Byte &reg);
 
     // Addressing modes
-    Byte AddressingZeroPage(unsigned int &nCycles, Mem &mem);
-    Byte AddressingZeroPageX(unsigned int &nCycles, Mem &mem);
-    Byte AddressingZeroPageY(unsigned int &nCycles, Mem &mem);
-    Word AddressingAbsolute(unsigned int &nCycles, Mem &mem);
-    Word AddressingAbsoluteX(unsigned int &nCycles, Mem &mem);
-    Word AddressingAbsoluteY(unsigned int &nCycles, Mem &mem);
-    Word AddressingIndirect(unsigned int &nCycles, Mem &mem);
-    Word AddressingIndexedIndirect(unsigned int &nCycles, Mem &mem);
-    Word AddressingIndirectIndexed(unsigned int &nCycles, Mem &mem);
+    cpu_6502::Byte AddressingZeroPage(unsigned int &nCycles, cpu_6502::Mem &mem);
+    cpu_6502::Byte AddressingZeroPageX(unsigned int &nCycles, cpu_6502::Mem &mem);
+    cpu_6502::Byte AddressingZeroPageY(unsigned int &nCycles, cpu_6502::Mem &mem);
+    cpu_6502::Word AddressingAbsolute(unsigned int &nCycles, cpu_6502::Mem &mem);
+    cpu_6502::Word AddressingAbsoluteX(unsigned int &nCycles, cpu_6502::Mem &mem);
+    cpu_6502::Word AddressingAbsoluteY(unsigned int &nCycles, cpu_6502::Mem &mem);
+    cpu_6502::Word AddressingIndirect(unsigned int &nCycles, cpu_6502::Mem &mem);
+    cpu_6502::Word AddressingIndexedIndirect(unsigned int &nCycles, cpu_6502::Mem &mem);
+    cpu_6502::Word AddressingIndirectIndexed(unsigned int &nCycles, cpu_6502::Mem &mem);
 
     // Stack operations
-    Word SPToAddr();
-    Byte PopByte(unsigned int &nCycles, Mem &mem);
-    Word PopWord(unsigned int &nCycles, Mem &mem);
-    void PushByte(unsigned int &nCycles, Byte val, Mem &mem);
-    void PushWord(unsigned int &nCycles, Word value, Mem &mem);
-    void PushStatusFlagsToStack(unsigned int &nCycles, Mem &mem);
-    void PopStatusFlagsFromStack(unsigned int &nCycles, Mem &mem);
+    cpu_6502::Word SPToAddr();
+    cpu_6502::Byte PopByte(unsigned int &nCycles, cpu_6502::Mem &mem);
+    cpu_6502::Word PopWord(unsigned int &nCycles, cpu_6502::Mem &mem);
+    void PushByte(unsigned int &nCycles, cpu_6502::Byte val, cpu_6502::Mem &mem);
+    void PushWord(unsigned int &nCycles, cpu_6502::Word value, cpu_6502::Mem &mem);
+    void PushStatusFlagsToStack(unsigned int &nCycles, cpu_6502::Mem &mem);
+    void PopStatusFlagsFromStack(unsigned int &nCycles, cpu_6502::Mem &mem);
 
-    void TransferRegister(Byte &src, Byte &dest);
+    void TransferRegister(cpu_6502::Byte &src, cpu_6502::Byte &dest);
 
     // Arithmetic instructions
-    void lAND(Byte val);
-    void EOR(Byte val);
+    void lAND(cpu_6502::Byte val);
+    void EOR(cpu_6502::Byte val);
 
     /*
      * Immediate: load next byte as the "argument" to the instruction.
@@ -106,7 +138,7 @@ struct CPU {
      *            "argument" of the instruction (a.k.a next byte = address
      *            to read from for the argument.)
      */
-    static const Byte
+    static const cpu_6502::Byte
         INS_LDA_IM = 0xA9,
         INS_LDA_ZP = 0xA5,
         INS_LDA_ZPX = 0xB5,
