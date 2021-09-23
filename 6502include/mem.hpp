@@ -3,6 +3,7 @@
 
 #include <cassert>
 #include <cstdint>
+#include <iostream>
 
 using Byte = uint8_t;
 using Word = uint16_t;
@@ -13,6 +14,7 @@ struct Mem {
     Byte Data[MAX_MEM];
 
     void Init();
+    void LoadMem(std::string filename);
 
     // Read one byte
     Byte operator[] (unsigned int address)  const {
