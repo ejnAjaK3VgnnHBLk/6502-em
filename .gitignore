@@ -32,7 +32,6 @@
 *.app
 
 build
-*.html
 *.kdev4
 .kdev4/
 *.kdev4
