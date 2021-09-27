@@ -29,7 +29,7 @@ TEST_F(LogicalTests, TestANDImmediate) {
     EXPECT_EQ(cpu.A, 0xaa);
 }
 
-TEST_F(LogicalTests, TestANDZP) {
+TEST_F(LogicalTests, TestANDZeroPage) {
     cpu.A = 0xFF;
     mem[0x0000] = cpu.INS_AND_ZP;
     mem[0x0001] = 0x1B;
@@ -39,7 +39,7 @@ TEST_F(LogicalTests, TestANDZP) {
     EXPECT_EQ(cpu.A, 0xAA);
 }
 
-TEST_F(LogicalTests, TestANDZPX) {
+TEST_F(LogicalTests, TestANDZeroPageX) {
     cpu.A = 0xFF;
     cpu.X = 0x10;
     mem[0x0000] = cpu.INS_AND_ZPX;
@@ -96,7 +96,7 @@ TEST_F(LogicalTests, TestANDIndexedIndirect) {
 
     mem[0x8008] = 0xAA;
 
-    cpu.Execute(5, mem);
+    cpu.Execute(6, mem);
     EXPECT_EQ(cpu.A, 0xAA);
 }
 
@@ -195,7 +195,7 @@ TEST_F(LogicalTests, TestEORIndexedIndirect) {
 
     mem[0x8008] = 0xAA;
 
-    cpu.Execute(5, mem);
+    cpu.Execute(6, mem);
     EXPECT_EQ(cpu.A, 0xb1);
 }
 
@@ -294,7 +294,7 @@ TEST_F(LogicalTests, TestORAIndexedIndirect) {
 
     mem[0x8008] = 0xAA;
 
-    cpu.Execute(5, mem);
+    cpu.Execute(6, mem);
     EXPECT_EQ(cpu.A, 0xbb);
 }
 
@@ -337,7 +337,7 @@ TEST_F(LogicalTests, TestBITAbsolute) {
     mem[0x0002] = 0x80;
     mem[0x8008] = 0b11000000;
 
-    cpu.Execute(3, mem);
+    cpu.Execute(4, mem);
 
     EXPECT_EQ(cpu.SF.V, 1);
     EXPECT_EQ(cpu.SF.N, 1);

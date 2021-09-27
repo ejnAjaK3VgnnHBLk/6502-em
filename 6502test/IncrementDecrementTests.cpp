@@ -61,7 +61,7 @@ TEST_F(IncrementDecrementTests, TestIncrementX) {
 
     mem[0x0000] = cpu.INS_INX;
 
-    cpu.Execute(1, mem);
+    cpu.Execute(2, mem);
 
     EXPECT_EQ(cpu.X, 0x2);
     EXPECT_FALSE(cpu.SF.C);
@@ -78,7 +78,7 @@ TEST_F(IncrementDecrementTests, TestDecrementX) {
 
     mem[0x0000] = cpu.INS_DEX;
 
-    cpu.Execute(1, mem);
+    cpu.Execute(2, mem);
 
     EXPECT_EQ(cpu.X, 0x1);
     EXPECT_FALSE(cpu.SF.C);
@@ -94,7 +94,7 @@ TEST_F(IncrementDecrementTests, TestIncrementY) {
     cpu.Y = 0x41;
     mem[0x0000] = cpu.INS_INY;
 
-    cpu.Execute(4, mem);
+    cpu.Execute(2, mem);
 
     EXPECT_EQ(cpu.Y, 0x42);
     EXPECT_FALSE(cpu.SF.C);
@@ -110,7 +110,7 @@ TEST_F(IncrementDecrementTests, TestDecrementY) {
     cpu.Y = 0x1;
     mem[0x0000] = cpu.INS_DEY;
 
-    cpu.Execute(3, mem);
+    cpu.Execute(2, mem);
 
     EXPECT_EQ(cpu.Y, 0x0);
     EXPECT_FALSE(cpu.SF.C);

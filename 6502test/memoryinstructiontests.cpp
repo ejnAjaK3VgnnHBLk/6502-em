@@ -26,7 +26,7 @@ TEST_F(MemoryInstructionTests, TestBRK) {
     cpu.PSF = 0b10101010;
     mem[0x0] = cpu.INS_BRK;
 
-    cpu.Execute(2, mem);
+    cpu.Execute(7, mem);
 
     EXPECT_EQ(mem[0x1FF], 0x0);
     EXPECT_EQ(mem[0x1FE], 0x2);
@@ -40,7 +40,7 @@ TEST_F(MemoryInstructionTests, TestBRK) {
     cpu.PSF = 0b11101111;
 
     mem[0x1001] = cpu.INS_RTI;
-    cpu.Execute(5, mem);
+    cpu.Execute(6, mem);
 
     EXPECT_EQ(cpu.PC, 0x2);
     EXPECT_EQ(cpu.PSF, 0b10001010); // Remember that RTI flips B to a 0
@@ -54,13 +54,6 @@ TEST_F(MemoryInstructionTests, TestJSR) {
     cpu.Execute(6, mem);
 
     EXPECT_EQ(cpu.PC, 0x69);
-}
-
-TEST_F(MemoryInstructionTests, TestRTS) {
-    cpu.SP = 0x10;
-    mem[0x0000] = cpu.INS_RTS;
-
-    
 }
 
 TEST_F(MemoryInstructionTests, CanJumpToSubroutineAndBack) {

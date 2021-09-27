@@ -43,7 +43,7 @@ TEST_F(TransferRegisterTests, TestStatusFlags) {
     mem[0x1] = cpu.INS_SED;
     mem[0x2] = cpu.INS_SEI;
     for(int i = 0; i<3; i++)
-        cpu.Execute(1, mem);
+        cpu.Execute(2, mem);
     EXPECT_TRUE(cpu.SF.C);
     EXPECT_TRUE(cpu.SF.D);
     EXPECT_TRUE(cpu.SF.I);
@@ -52,7 +52,7 @@ TEST_F(TransferRegisterTests, TestStatusFlags) {
     mem[0x5] = cpu.INS_CLI;
     mem[0x6] = cpu.INS_CLV;
     for (int i = 0; i<4; i++)
-        cpu.Execute(1, mem);
+        cpu.Execute(2, mem);
     EXPECT_FALSE(cpu.SF.C);
     EXPECT_FALSE(cpu.SF.D);
     EXPECT_FALSE(cpu.SF.I);

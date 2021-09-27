@@ -23,7 +23,7 @@ TEST_F(LoadRegisterTest, TestLDAImmediate) {
     mem[0x0000] = cpu.INS_LDA_IM;
     mem[0x0001] = 0x42;
 
-    cpu.Execute(4, mem);
+    cpu.Execute(2, mem);
 
     EXPECT_EQ( cpu.A, 0x42 );
     EXPECT_FALSE(cpu.SF.C);
@@ -60,7 +60,7 @@ TEST_F(LoadRegisterTest, TestLDAZeroPageX) {
 
     mem[0x0044] = 0x50;
 
-    cpu.Execute(5, mem);
+    cpu.Execute(4, mem);
 
     EXPECT_EQ( cpu.A, 0x50);
     EXPECT_FALSE(cpu.SF.C);
@@ -79,7 +79,7 @@ TEST_F(LoadRegisterTest, TestLDAZeroPageXWhenItWraps) {
 
     mem[0x007F] = 0x50;
 
-    cpu.Execute(5, mem);
+    cpu.Execute(4, mem);
 
     EXPECT_EQ( cpu.A, 0x50);
     EXPECT_FALSE(cpu.SF.C);
@@ -98,7 +98,7 @@ TEST_F(LoadRegisterTest, TestLDAAbsolute) {
 
     mem[0x0100] = 0x1;
 
-    cpu.Execute(6, mem);
+    cpu.Execute(4, mem);
 
     EXPECT_EQ( cpu.A, 0x1);
     EXPECT_FALSE(cpu.SF.C);
@@ -184,7 +184,7 @@ TEST_F(LoadRegisterTest, TestLDAIndirectY) {
 	mem[0x0007] = 0x80;	
 	mem[0x8000] = 0x37;
 
-    cpu.Execute(6, mem);
+    cpu.Execute(5, mem);
     
     EXPECT_EQ(cpu.A, 0x37);
 
@@ -201,7 +201,7 @@ TEST_F(LoadRegisterTest, TestLDXImmediate) {
     mem[0x0000] = cpu.INS_LDX_IM;
     mem[0x0001] = 0x69;
 
-    cpu.Execute(4, mem);
+    cpu.Execute(2, mem);
 
     EXPECT_EQ(cpu.X, 0x69);
     EXPECT_FALSE(cpu.SF.C);
@@ -219,7 +219,7 @@ TEST_F(LoadRegisterTest, TestLDXZeroPage) {
 
     mem[0x0080] = 0x69;
 
-    cpu.Execute(4, mem);
+    cpu.Execute(3, mem);
 
     EXPECT_EQ(cpu.X, 0x69);
     EXPECT_FALSE(cpu.SF.C);
@@ -240,7 +240,7 @@ TEST_F(LoadRegisterTest, TestLDXZeroPageY) {
 
     mem[0x0042] = 0x69;
 
-    cpu.Execute(6, mem);
+    cpu.Execute(4, mem);
 
     EXPECT_EQ(cpu.X, 0x69);
 
@@ -261,7 +261,7 @@ TEST_F(LoadRegisterTest, TestLDXZeroPageYWhenItWraps) {
 
     mem[0x007F] = 0x69;
 
-    cpu.Execute(6, mem);
+    cpu.Execute(4, mem);
 
     EXPECT_EQ(cpu.X, 0x69);
 
@@ -281,7 +281,7 @@ TEST_F(LoadRegisterTest, TestLDXAbsolute) {
 
     mem[0x1234] = 0x1;
 
-    cpu.Execute(6, mem);
+    cpu.Execute(4, mem);
 
     EXPECT_EQ( cpu.X, 0x1);
 
