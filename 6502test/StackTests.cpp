@@ -23,15 +23,15 @@ TEST_F(StackTests, PopByteTest) {
     mem[0x100] = 0x14;
     mem[0x101] = 0x21;
 
-    cpu_6502::Byte test1 = cpu.PopByte(nCycles, mem);
-    cpu_6502::Byte test2 = cpu.PopByte(nCycles, mem);
+    cpu_6502::Byte test1 = cpu.PopByte(mem);
+    cpu_6502::Byte test2 = cpu.PopByte(mem);
 
     EXPECT_EQ(test1, 0x14);
     EXPECT_EQ(test2, 0x21);
 }
 
 TEST_F(StackTests, PushByte) {
-    cpu.PushByte(nCycles, 0x12, mem);
+    cpu.PushByte(0x12, mem);
     EXPECT_EQ(mem[0x1FF], 0x12);
     EXPECT_EQ(cpu.SP, 0xFE);
 }

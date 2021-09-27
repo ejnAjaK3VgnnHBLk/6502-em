@@ -50,7 +50,7 @@ TEST_F(ArithmeticTests, TestCMPZeroPage) {
     mem[0x0] = cpu.INS_CMP_ZP;
     mem[0x1] = 0x24;
     mem[0x24] = 0x42;
-    cpu.Execute(2, mem);
+    cpu.Execute(3, mem);
     EXPECT_EQ(cpu.SF.Z, 1);
     EXPECT_EQ(cpu.SF.C, 1);
     EXPECT_EQ(cpu.SF.N, 0);
@@ -59,7 +59,7 @@ TEST_F(ArithmeticTests, TestCMPZeroPage) {
     mem[0x2] = cpu.INS_CMP_ZP;
     mem[0x3] = 0x24;
     mem[0x24] = 0x42;
-    cpu.Execute(2, mem);
+    cpu.Execute(3, mem);
     EXPECT_EQ(cpu.SF.Z, 0);
     EXPECT_EQ(cpu.SF.C, 1);
     EXPECT_EQ(cpu.SF.N, 0);
@@ -68,7 +68,7 @@ TEST_F(ArithmeticTests, TestCMPZeroPage) {
     mem[0x4] = cpu.INS_CMP_ZP;
     mem[0x5] = 0x24;
     mem[0x24] = 0b00000000;
-    cpu.Execute(2, mem);
+    cpu.Execute(3, mem);
     EXPECT_EQ(cpu.SF.Z, 0);
     EXPECT_EQ(cpu.SF.C, 1);
     EXPECT_EQ(cpu.SF.N, 1);
@@ -106,7 +106,7 @@ TEST_F(ArithmeticTests, TestCPYZeroPage) {
     mem[0x0] = cpu.INS_CPY_ZP;
     mem[0x1] = 0x24;
     mem[0x24] = 0x42;
-    cpu.Execute(2, mem);
+    cpu.Execute(3, mem);
     EXPECT_EQ(cpu.SF.Z, 1);
     EXPECT_EQ(cpu.SF.C, 1);
     EXPECT_EQ(cpu.SF.N, 0);
@@ -115,7 +115,7 @@ TEST_F(ArithmeticTests, TestCPYZeroPage) {
     mem[0x2] = cpu.INS_CPY_ZP;
     mem[0x3] = 0x24;
     mem[0x24] = 0x42;
-    cpu.Execute(2, mem);
+    cpu.Execute(3, mem);
     EXPECT_EQ(cpu.SF.Z, 0);
     EXPECT_EQ(cpu.SF.C, 1);
     EXPECT_EQ(cpu.SF.N, 0);
@@ -124,7 +124,7 @@ TEST_F(ArithmeticTests, TestCPYZeroPage) {
     mem[0x4] = cpu.INS_CPY_ZP;
     mem[0x5] = 0x24;
     mem[0x24] = 0b00000000;
-    cpu.Execute(2, mem);
+    cpu.Execute(3, mem);
     EXPECT_EQ(cpu.SF.Z, 0);
     EXPECT_EQ(cpu.SF.C, 1);
     EXPECT_EQ(cpu.SF.N, 1);
@@ -162,7 +162,7 @@ TEST_F(ArithmeticTests, TestCPXZeroPage) {
     mem[0x0] = cpu.INS_CPX_ZP;
     mem[0x1] = 0x24;
     mem[0x24] = 0x42;
-    cpu.Execute(2, mem);
+    cpu.Execute(3, mem);
     EXPECT_EQ(cpu.SF.Z, 1);
     EXPECT_EQ(cpu.SF.C, 1);
     EXPECT_EQ(cpu.SF.N, 0);
@@ -171,7 +171,7 @@ TEST_F(ArithmeticTests, TestCPXZeroPage) {
     mem[0x2] = cpu.INS_CPX_ZP;
     mem[0x3] = 0x24;
     mem[0x24] = 0x42;
-    cpu.Execute(2, mem);
+    cpu.Execute(3, mem);
     EXPECT_EQ(cpu.SF.Z, 0);
     EXPECT_EQ(cpu.SF.C, 1);
     EXPECT_EQ(cpu.SF.N, 0);
@@ -180,7 +180,7 @@ TEST_F(ArithmeticTests, TestCPXZeroPage) {
     mem[0x4] = cpu.INS_CPX_ZP;
     mem[0x5] = 0x24;
     mem[0x24] = 0b00000000;
-    cpu.Execute(2, mem);
+    cpu.Execute(3, mem);
     EXPECT_EQ(cpu.SF.Z, 0);
     EXPECT_EQ(cpu.SF.C, 1);
     EXPECT_EQ(cpu.SF.N, 1);
