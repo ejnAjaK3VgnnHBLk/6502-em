@@ -11,7 +11,7 @@ void cpu_6502::Mem::LoadMem(std::string filename) {
     FILE *file = NULL;
     if ((file = fopen(filename.c_str(), "rb")) == NULL)
         cout << "Could not open specified file." << endl;
-    fread(Data, MAX_MEM, 1, file);
+    fread(Data, 1, MAX_MEM, file);
 
     fclose(file);
 }

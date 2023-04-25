@@ -150,7 +150,7 @@ void cpu_6502::CPU::Execute(unsigned int nCycles, cpu_6502::Mem &mem) {
                 A = sum & 0xFF;
                 UpdateZeroAndNegativeFlags(A);
                 SF.C = sum > 0xFF;
-                SF.V = !((origA ^ val) & 0b10000000) && ((A ^ val) & 0b10000000);
+                SF.V = !((origA ^ val) & 0b10000000) && ((A ^ val) & 0b10000000); // bruh
 
                 nCycles -= 2;
             } break;
