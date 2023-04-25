@@ -7,7 +7,7 @@
  *RTS SBC SEC SED SEI STA STX STY TAX TAY TSX TXA TXS TYA
  */
 
-void cpu_6502::CPU::Execute(unsigned int nCycles, cpu_6502::Mem &mem) {
+void cpu_6502::CPU::Execute(unsigned int nCycles, mem_28c256::Mem &mem) {
     auto lAND = [&mem, this](cpu_6502::Word addr) {
         A &= ReadByte(addr, mem);
         UpdateZeroAndNegativeFlags(A);
@@ -928,11 +928,11 @@ void cpu_6502::CPU::Execute(unsigned int nCycles, cpu_6502::Mem &mem) {
     }
 }
 
-void cpu_6502::CPU::PushStatusFlagsToStack(cpu_6502::Mem &mem) {
+void cpu_6502::CPU::PushStatusFlagsToStack(mem_28c256::Mem &mem) {
     PushByte(PSF, mem);
 }
 
-void cpu_6502::CPU::PopStatusFlagsFromStack(cpu_6502::Mem &mem) {
+void cpu_6502::CPU::PopStatusFlagsFromStack(mem_28c256::Mem &mem) {
     PSF = PopByte(mem);
 }
 
@@ -958,18 +958,18 @@ void cpu_6502::CPU::UpdateZeroAndNegativeFlags(cpu_6502::Byte &reg) {
     SF.N = (reg & 0b10000000) > 0;
 }
 
-cpu_6502::Byte cpu_6502::CPU::FetchByte(cpu_6502::Mem &mem) {
+cpu_6502::Byte cpu_6502::CPU::FetchByte(mem_28c256::Mem &mem) {
     cpu_6502::Byte ins = mem[PC];
     PC++;
     return ins;
 }
 
-cpu_6502::Byte cpu_6502::CPU::ReadByte(cpu_6502::Word addr, cpu_6502::Mem &mem) {
+cpu_6502::Byte cpu_6502::CPU::ReadByte(cpu_6502::Word addr, mem_28c256::Mem &mem) {
     cpu_6502::Byte ins = mem[addr];
     return ins;
 }
 
-cpu_6502::Word cpu_6502::CPU::FetchWord(cpu_6502::Mem &mem) {
+cpu_6502::Word cpu_6502::CPU::FetchWord(mem_28c256::Mem &mem) {
     // Remember the 6502 is LITTLE ENDIAN, MEANING THE LEAST SIGNIFICANT
     // BIT COMES FIRST.
     cpu_6502::Word Data = mem[PC];
@@ -981,7 +981,7 @@ cpu_6502::Word cpu_6502::CPU::FetchWord(cpu_6502::Mem &mem) {
     return Data;
 }
 
-cpu_6502::Word cpu_6502::CPU::ReadWord(cpu_6502::Word addr, cpu_6502::Mem &mem) {
+cpu_6502::Word cpu_6502::CPU::ReadWord(cpu_6502::Word addr, mem_28c256::Mem &mem) {
     // Remember the 6502 is LITTLE ENDIAN, MEANING THE LEAST SIGNIFICANT
     // BIT COMES FIRST.
     cpu_6502::Word Data = mem[addr];
@@ -991,16 +991,16 @@ cpu_6502::Word cpu_6502::CPU::ReadWord(cpu_6502::Word addr, cpu_6502::Mem &mem) 
     return Data;
 }
 
-void cpu_6502::CPU::WriteWord(cpu_6502::Word dta, unsigned int addr, cpu_6502::Mem &mem) {
+void cpu_6502::CPU::WriteWord(cpu_6502::Word dta, unsigned int addr, mem_28c256::Mem &mem) {
     mem[addr] = dta & 0xFF;
     mem[addr+1] = (dta >> 8);
 }
 
-void cpu_6502::CPU::WriteByte(cpu_6502::Byte data, unsigned int addr, cpu_6502::Mem &mem) {
+void cpu_6502::CPU::WriteByte(cpu_6502::Byte data, unsigned int addr, mem_28c256::Mem &mem) {
     mem[addr] = data;
 }
 
-void cpu_6502::CPU::WriteToMemFromRegister(cpu_6502::Byte &reg, cpu_6502::Word addr, cpu_6502::Mem &mem) {
+void cpu_6502::CPU::WriteToMemFromRegister(cpu_6502::Byte &reg, cpu_6502::Word addr, mem_28c256::Mem &mem) {
     mem[addr] = reg;
 }
 
@@ -1011,13 +1011,13 @@ void cpu_6502::CPU::WriteRegister(cpu_6502::Byte &reg, cpu_6502::Byte value) {
 
 cpu_6502::Word cpu_6502::CPU::SPToAddr() { return SP + 0x100; }
 
-cpu_6502::Byte cpu_6502::CPU::PopByte(cpu_6502::Mem &mem) {
+cpu_6502::Byte cpu_6502::CPU::PopByte(mem_28c256::Mem &mem) {
     SP++;
     cpu_6502::Byte value = ReadByte(SPToAddr(), mem);
     return value;
 }
 
-cpu_6502::Word cpu_6502::CPU::PopWord(cpu_6502::Mem &mem) {
+cpu_6502::Word cpu_6502::CPU::PopWord(mem_28c256::Mem &mem) {
     cpu_6502::Word value = mem[SPToAddr()+1];
     SP++;
     value |= (mem[SPToAddr()+1] << 8);
@@ -1026,12 +1026,12 @@ cpu_6502::Word cpu_6502::CPU::PopWord(cpu_6502::Mem &mem) {
     return value;
 }
 
-void cpu_6502::CPU::PushByte(cpu_6502::Byte value, cpu_6502::Mem &mem) {
+void cpu_6502::CPU::PushByte(cpu_6502::Byte value, mem_28c256::Mem &mem) {
     mem[SPToAddr()] = value;
     SP--;
 }
 
-void cpu_6502::CPU::PushWord(cpu_6502::Word value, cpu_6502::Mem &mem) {
+void cpu_6502::CPU::PushWord(cpu_6502::Word value, mem_28c256::Mem &mem) {
     mem[SPToAddr()] = value >> 8;
     SP--;
     mem[SPToAddr()] = value & 0xFF;
@@ -1041,12 +1041,12 @@ void cpu_6502::CPU::PushWord(cpu_6502::Word value, cpu_6502::Mem &mem) {
 // Addressing Mode Functions
 // See (https://github.com/ejnAjaK3VgnnHBLk/6502-em/pull/20#issue-988360270) for why I don't implement
 //      some addressing modes here!
-cpu_6502::Byte cpu_6502::CPU::AddressingZeroPage(cpu_6502::Mem &mem) {
+cpu_6502::Byte cpu_6502::CPU::AddressingZeroPage(mem_28c256::Mem &mem) {
     // zero page addressing mode has only an 8 bit address operand
     return FetchByte(mem);
 }
 
-cpu_6502::Byte cpu_6502::CPU::AddressingZeroPageX(cpu_6502::Mem &mem) {
+cpu_6502::Byte cpu_6502::CPU::AddressingZeroPageX(mem_28c256::Mem &mem) {
     // taking the 8 bit zero page address from the instruction and adding the current value of 
     // the X register to it
     cpu_6502::Byte zpAddress = FetchByte(mem);
@@ -1055,7 +1055,7 @@ cpu_6502::Byte cpu_6502::CPU::AddressingZeroPageX(cpu_6502::Mem &mem) {
     return zpAddress;
 }
 
-cpu_6502::Byte cpu_6502::CPU::AddressingZeroPageY(cpu_6502::Mem &mem) {
+cpu_6502::Byte cpu_6502::CPU::AddressingZeroPageY(mem_28c256::Mem &mem) {
     // taking the 8 bit zero page address from the instruction and adding the current value of 
     // the Y register to it
     cpu_6502::Byte zpAddress = FetchByte(mem);
@@ -1064,26 +1064,26 @@ cpu_6502::Byte cpu_6502::CPU::AddressingZeroPageY(cpu_6502::Mem &mem) {
     return zpAddress;
 }
 
-cpu_6502::Word cpu_6502::CPU::AddressingAbsolute(cpu_6502::Mem &mem) {
+cpu_6502::Word cpu_6502::CPU::AddressingAbsolute(mem_28c256::Mem &mem) {
     // contain a full 16 bit address to identify the target location
     return FetchWord(mem);
 }
 
-cpu_6502::Word cpu_6502::CPU::AddressingAbsoluteX(cpu_6502::Mem &mem) {
+cpu_6502::Word cpu_6502::CPU::AddressingAbsoluteX(mem_28c256::Mem &mem) {
     // taking the 16 bit address from the instruction and added the contents of the X register
     cpu_6502::Word addr = FetchWord(mem);
     addr += X; // Add X register to the fetched address
     return addr;
 }
 
-cpu_6502::Word cpu_6502::CPU::AddressingAbsoluteY(cpu_6502::Mem &mem) {
+cpu_6502::Word cpu_6502::CPU::AddressingAbsoluteY(mem_28c256::Mem &mem) {
     // same as the previous mode only with the contents of the Y register
     cpu_6502::Word addr = FetchWord(mem);
     addr += Y; // Add X register to the fetched address
     return addr;
 }
 
-cpu_6502::Word cpu_6502::CPU::AddressingIndirect(cpu_6502::Mem &mem) {
+cpu_6502::Word cpu_6502::CPU::AddressingIndirect(mem_28c256::Mem &mem) {
     // The instruction contains a 16 bit address which identifies the location of the least 
     //significant byte of another 16 bit memory address which is the real target of the instruction
     cpu_6502::Word addr = FetchWord(mem);
@@ -1091,7 +1091,7 @@ cpu_6502::Word cpu_6502::CPU::AddressingIndirect(cpu_6502::Mem &mem) {
 
 }
 
-cpu_6502::Word cpu_6502::CPU::AddressingIndexedIndirect(cpu_6502::Mem &mem) {
+cpu_6502::Word cpu_6502::CPU::AddressingIndexedIndirect(mem_28c256::Mem &mem) {
     // The address of the table is taken from the instruction and the X register added to it (with 
     // zero page wrap around) to give the location of the least significant byte of the target address.
     cpu_6502::Byte addr = FetchByte(mem);
@@ -1099,7 +1099,7 @@ cpu_6502::Word cpu_6502::CPU::AddressingIndexedIndirect(cpu_6502::Mem &mem) {
     return ReadWord(addr, mem);
 }
 
-cpu_6502::Word cpu_6502::CPU::AddressingIndirectIndexed(cpu_6502::Mem &mem) {
+cpu_6502::Word cpu_6502::CPU::AddressingIndirectIndexed(mem_28c256::Mem &mem) {
     // In instruction contains the zero page location of the least significant byte of 16 bit address. 
     // The Y register is dynamically added to this value to generated the actual target address for operation.
     cpu_6502::Byte addr = FetchByte(mem);
@@ -1107,7 +1107,7 @@ cpu_6502::Word cpu_6502::CPU::AddressingIndirectIndexed(cpu_6502::Mem &mem) {
     return ReadWord(addr, mem);
 }   
 
-void cpu_6502::CPU::Reset(cpu_6502::Mem &mem) {
+void cpu_6502::CPU::Reset(mem_28c256::Mem &mem) {
     PC = 0xFFFC;             // Initialize program counter to 0xFFC
     SP = 0xFF;            // Inititalize stack pointer to 0x01FF
     SF.C = SF.Z = SF.I = SF.D = SF.B = SF.V = SF.N = 0; // Reset status flags

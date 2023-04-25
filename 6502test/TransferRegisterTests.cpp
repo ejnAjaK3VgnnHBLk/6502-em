@@ -4,7 +4,7 @@
 class TransferRegisterTests : public ::testing::Test {
     public:
         cpu_6502::CPU cpu;
-       cpu_6502::Mem mem;
+       mem_28c256::Mem mem;
 
     void SetUp() override {
         // Called immediately after the constructor

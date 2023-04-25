@@ -4,7 +4,7 @@
 class StackTests : public ::testing::Test {
     public:
         cpu_6502::CPU cpu;
-        cpu_6502::Mem mem;
+        mem_28c256::Mem mem;
         unsigned int nCycles = 50;
 
     void SetUp() override {

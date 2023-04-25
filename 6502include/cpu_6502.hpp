@@ -6,35 +6,15 @@
 #include <cstdint>
 #include <iostream>
 
+#include "mem_28c256.hpp"
+
 namespace cpu_6502 {
     using Byte = uint8_t;
     using Word = uint16_t;
 
-    struct Mem;
     struct CPU;
     struct StatusFlags;
 }
-
-const static unsigned int MAX_MEM = 1024 * 64;
-
-struct cpu_6502::Mem {
-    Byte Data[MAX_MEM];
-
-    void Init();
-    void LoadMem(std::string filename);
-
-    // Read one byte
-    Byte operator[] (unsigned int address)  const {
-        assert (address <= MAX_MEM);
-        return Data[address];
-    }
-
-    // Write one byte
-    Byte& operator[] (unsigned int address) {
-        assert (address <= MAX_MEM);
-        return Data[address];
-    }
-};
 
 struct cpu_6502::StatusFlags {
     // Processor status flags: only 1 bit long and are technically supposed to
@@ -73,32 +53,32 @@ struct cpu_6502::CPU {
     };
 
     // Read byte from memory, increment program counter and decrement nCycles
-    cpu_6502::Byte FetchByte(cpu_6502::Mem &mem);
+    cpu_6502::Byte FetchByte(mem_28c256::Mem &mem);
 
     // Same thing as Fetchcpu_6502::Byte but don't increment program counter
-    cpu_6502::Byte ReadByte(cpu_6502::Word addr, cpu_6502::Mem &mem);
+    cpu_6502::Byte ReadByte(cpu_6502::Word addr, mem_28c256::Mem &mem);
 
     // Fetch word from memory, increment program counter and decrement cycles
-    cpu_6502::Word FetchWord(cpu_6502::Mem &mem);
+    cpu_6502::Word FetchWord(mem_28c256::Mem &mem);
 
     // Same thing as FetchWord but don't increment program counter
-    cpu_6502::Word ReadWord(cpu_6502::Word addr, cpu_6502::Mem &mem);
+    cpu_6502::Word ReadWord(cpu_6502::Word addr, mem_28c256::Mem &mem);
 
     // Write word and byte
-    void WriteWord(cpu_6502::Word dta, unsigned int addr, cpu_6502::Mem &mem);
-    void WriteByte(cpu_6502::Byte data, unsigned int addr, cpu_6502::Mem &mem);
+    void WriteWord(cpu_6502::Word dta, unsigned int addr, mem_28c256::Mem &mem);
+    void WriteByte(cpu_6502::Byte data, unsigned int addr, mem_28c256::Mem &mem);
 
     // Write register to memory
-    void WriteToMemFromRegister(cpu_6502::Byte &reg, cpu_6502::Word addr, cpu_6502::Mem &mem);
+    void WriteToMemFromRegister(cpu_6502::Byte &reg, cpu_6502::Word addr, mem_28c256::Mem &mem);
 
     // Write to register using value
     void WriteRegister(cpu_6502::Byte &reg, cpu_6502::Byte value);
 
     // Execute instruction based on PC location
-    void Execute(unsigned int nCycles, cpu_6502::Mem &mem);
+    void Execute(unsigned int nCycles, mem_28c256::Mem &mem);
 
     // Reset everything to default status
-    void Reset(cpu_6502::Mem &mem);
+    void Reset(mem_28c256::Mem &mem);
 
     // Debugging function
     void debugReport();
@@ -107,24 +87,24 @@ struct cpu_6502::CPU {
     void UpdateZeroAndNegativeFlags(cpu_6502::Byte &reg);
 
     // Addressing modes
-    cpu_6502::Byte AddressingZeroPage(cpu_6502::Mem &mem);
-    cpu_6502::Byte AddressingZeroPageX(cpu_6502::Mem &mem);
-    cpu_6502::Byte AddressingZeroPageY(cpu_6502::Mem &mem);
-    cpu_6502::Word AddressingAbsolute(cpu_6502::Mem &mem);
-    cpu_6502::Word AddressingAbsoluteX(cpu_6502::Mem &mem);
-    cpu_6502::Word AddressingAbsoluteY(cpu_6502::Mem &mem);
-    cpu_6502::Word AddressingIndirect(cpu_6502::Mem &mem);
-    cpu_6502::Word AddressingIndexedIndirect(cpu_6502::Mem &mem);
-    cpu_6502::Word AddressingIndirectIndexed(cpu_6502::Mem &mem);
+    cpu_6502::Byte AddressingZeroPage(mem_28c256::Mem &mem);
+    cpu_6502::Byte AddressingZeroPageX(mem_28c256::Mem &mem);
+    cpu_6502::Byte AddressingZeroPageY(mem_28c256::Mem &mem);
+    cpu_6502::Word AddressingAbsolute(mem_28c256::Mem &mem);
+    cpu_6502::Word AddressingAbsoluteX(mem_28c256::Mem &mem);
+    cpu_6502::Word AddressingAbsoluteY(mem_28c256::Mem &mem);
+    cpu_6502::Word AddressingIndirect(mem_28c256::Mem &mem);
+    cpu_6502::Word AddressingIndexedIndirect(mem_28c256::Mem &mem);
+    cpu_6502::Word AddressingIndirectIndexed(mem_28c256::Mem &mem);
 
     // Stack operations
     cpu_6502::Word SPToAddr();
-    cpu_6502::Byte PopByte(cpu_6502::Mem &mem);
-    cpu_6502::Word PopWord(cpu_6502::Mem &mem);
-    void PushByte(cpu_6502::Byte val, cpu_6502::Mem &mem);
-    void PushWord(cpu_6502::Word value, cpu_6502::Mem &mem);
-    void PushStatusFlagsToStack(cpu_6502::Mem &mem);
-    void PopStatusFlagsFromStack(cpu_6502::Mem &mem);
+    cpu_6502::Byte PopByte(mem_28c256::Mem &mem);
+    cpu_6502::Word PopWord(mem_28c256::Mem &mem);
+    void PushByte(cpu_6502::Byte val, mem_28c256::Mem &mem);
+    void PushWord(cpu_6502::Word value, mem_28c256::Mem &mem);
+    void PushStatusFlagsToStack(mem_28c256::Mem &mem);
+    void PopStatusFlagsFromStack(mem_28c256::Mem &mem);
 
     void TransferRegister(cpu_6502::Byte &src, cpu_6502::Byte &dest);
 
